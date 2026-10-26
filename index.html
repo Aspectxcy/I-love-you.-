@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flowers In Every Language 🌸</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+    body {
+      background-color: #030305;
+      color: #fce7f3;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    /* Top Header Bar */
+    header {
+      width: 100%;
+      max-width: 900px;
+      padding: 16px 20px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 10;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      background: rgba(255, 45, 117, 0.12);
+      border: 1px solid rgba(255, 45, 117, 0.35);
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #fda4af;
+    }
+    .flower-tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+      background: rgba(18, 18, 22, 0.85);
+      padding: 4px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #a1a1aa;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .tab-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .tab-btn.active {
+      color: #ffffff;
+      background: linear-gradient(135deg, #e11d48, #ec4899);
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
+    }
+    /* Main Canvas Stage */
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 10px 16px;
+    }
+    .canvas-card {
+      position: relative;
+      width: 100%;
+      max-width: 580px;
+      aspect-ratio: 9 / 13;
+      max-height: 70vh;
+      background: #000000;
+      border-radius: 24px;
+      box-shadow: 0 0 50px rgba(244, 63, 94, 0.15), 0 20px 40px rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+    /* Word Hover Card */
+    #tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: rgba(15, 15, 20, 0.95);
+      border: 1px solid rgba(244, 114, 182, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      border-radius: 12px;
+      padding: 8px 14px;
+      font-size: 12px;
+      color: #fff;
+      display: none;
+      z-index: 50;
+      transform: translate(-50%, -120%);
+      white-space: nowrap;
+    }
+    #tooltip .lang {
+      color: #f472b6;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    #tooltip .trans {
+      color: #e4e4e7;
+      font-size: 13px;
+      margin-top: 2px;
+    }
+    /* Bottom Controls Dock */
+    footer {
+      width: 100%;
+      max-width: 700px;
+      padding: 12px 16px 24px;
+      z-index: 10;
+    }
+    .dock {
+      background: rgba(18, 18, 24, 0.9);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+    }
+    .play-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #ec4899, #f43f5e);
+      border: none;
+      color: white;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.2s ease;
+      flex-shrink: 0;
+    }
+    .play-btn:active {
+      transform: scale(0.92);
+    }
+    .reset-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #d4d4d8;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      flex-shrink: 0;
+    }
+    .reset-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+    .slider-group {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .progress-txt {
+      font-size: 11px;
+      font-family: monospace;
+      color: #a1a1aa;
+      width: 38px;
+    }
+    input[type="range"] {
+      flex: 1;
+      accent-color: #ec4899;
+      height: 5px;
+      border-radius: 4px;
+      background: #27272a;
+      cursor: pointer;
+    }
+    .dedication-badge {
+      font-size: 11px;
+      padding: 3px 10px;
+      background: rgba(236, 72, 153, 0.15);
+      border: 1px solid rgba(236, 72, 153, 0.35);
+      color: #fda4af;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="badge">
+      <span>Multilingual Botanical Art</span>
+    </div>
+
+    <!-- Flower Chooser Tabs -->
+    <div class="flower-tabs">
+      <button class="tab-btn" data-flower="pink_rose">🌸 Pink Rose</button>
+      <button class="tab-btn" data-flower="pink_lily">🌺 Pink Lily</button>
+      <button class="tab-btn" data-flower="red_rose">🌹 Red Rose</button>
+      <button class="tab-btn" data-flower="golden_sunflower">🌻 Sunflower</button>
+      <button class="tab-btn" data-flower="royal_tulip">🌷 Tulip</button>
+      <button class="tab-btn" data-flower="white_rose">🤍 White Rose</button>
+    </div>
+  </header>
+
+  <!-- Interactive Canvas Viewport -->
+  <main>
+    <div class="canvas-card" id="cardContainer">
+      <canvas id="flowerCanvas"></canvas>
+      <div id="tooltip">
+        <div class="lang" id="tooltipLang">LANGUAGE</div>
+        <div class="trans" id="tooltipText">Translation</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Timeline & Controls Dock -->
+  <footer>
+    <div class="dock">
+      <button class="play-btn" id="playBtn" title="Play / Pause Bloom">▶</button>
+      <button class="reset-btn" id="resetBtn" title="Restart from Seed">↺</button>
+      
+      <div class="slider-group">
+        <span class="progress-txt" id="progressLabel">100%</span>
+        <input type="range" id="bloomRange" min="0" max="1" step="0.005" value="1.0" />
+      </div>
+
+      <div class="dedication-badge" id="recipientBadge" style="display: none;">
+        For <span id="recipientSpan"></span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // --- EXACT EMBEDDED BOTANICAL DATA ---
+    const ROSE_HEAD = [[{"text":"Nakupenda","isBright":true},{"text":"LIEBE","isBold":true},{"text":"AMOR","isBold":true},{"text":"사랑해"},{"text":"我爱你"},{"text":"AMOR","isBold":true}],[{"text":"愛してる","isBold":true},{"text":"TI AMO","isBold":true},{"text":"Ti amo"},{"text":"รักคุณ"},{"text":"Szeretlek"},{"text":"사랑해"},{"text":"أحبك"}],[{"text":"Ik hou van jou"},{"text":"Σ' αγαπώ","isBold":true},{"text":"AMOR","isBold":true},{"text":"Te amo"},{"text":"LOVE","isBright":true},{"text":"أحبك"},{"text":"사랑해"},{"text":"愛"}],[{"text":"मैं तुमसे प्यार करता हूँ"},{"text":"AMOUR","isBold":true,"isBright":true},{"text":"愛してる"},{"text":"Szeretlek"},{"text":"รักคุณ"},{"text":"我爱你"},{"text":"사랑해"}],[{"text":"Nakupenda","isBold":true},{"text":"Nakupenda"},{"text":"Kocham cię"},{"text":"TI AMO","isBold":true},{"text":"LOVE"},{"text":"AMOR","isBright":true},{"text":"TE AMO"},{"text":"أحبك"}],[{"text":"Kocham cię"},{"text":"Eu te amo","isBold":true},{"text":"אני אוהבת אותך"},{"text":"TI AMO"},{"text":"사랑해"},{"text":"사랑해"},{"text":"รักคุณ"},{"text":"사랑해"}],[{"text":"నిన్ను ప్రేమిస్తున్నాను"},{"text":"I LOVE YOU","isBold":true,"isBright":true},{"text":"AMORE"},{"text":"Te amo"},{"text":"TI AMO"},{"text":"사랑해"},{"text":"AMOR"},{"text":"AMOR","isBold":true},{"text":"愛"}],[{"text":"నిన్ను ప్రేమిస్తున్నాను"},{"text":"I LOVE YOU","isBold":true},{"text":"ANH YÊU EM"},{"text":"TE AMO","isBold":true},{"text":"사랑해"},{"text":"AMOR"},{"text":"รักคุณ"},{"text":"LOVE","isBold":true}],[{"text":"Seni seviyorum"},{"text":"Nakupenda"},{"text":"Nakupenda","isBold":true},{"text":"אני אוהבת אותך"},{"text":"TE AMO"},{"text":"我爱你"},{"text":"사랑해"},{"text":"Volim te"},{"text":"愛"}],[{"text":"Anh yêu em"},{"text":"TE QUIERO","isBold":true},{"text":"LOVE YOU"},{"text":"Szeretlek"},{"text":"我爱你"},{"text":"LOVE","isBold":true},{"text":"사랑"},{"text":"AMOR"},{"text":"รักคุณ"},{"text":"사랑해"}],[{"text":"Mahal kita","isBold":true},{"text":"Mahal kita"},{"text":"Я тебя люблю"},{"text":"I LOVE YOU","isBold":true,"isBright":true},{"text":"AMOR"},{"text":"TE AMO"},{"text":"我爱你"},{"text":"أحبك"},{"text":"사랑"},{"text":"愛"}],[{"text":"I LOVE YOU"},{"text":"TE AMO","isBold":true,"isBright":true},{"text":"Jag älskar dig"},{"text":"నిన్ను ప్రేమిస్తున్నాను"},{"text":"愛してる"},{"text":"我爱你"},{"text":"LOVE","isBold":true},{"text":"LOVE"},{"text":"รักคุณ"},{"text":"LOVE"}],[{"text":"Jeg elsker dig"},{"text":"Kocham cię","isBold":true},{"text":"AMOUR","isBold":true},{"text":"TE AMO"},{"text":"ভালোবাসি"},{"text":"我爱你"},{"text":"รักคุณ"},{"text":"LOVE"},{"text":"أحبك"},{"text":"愛"}],[{"text":"LOVE YOU"},{"text":"I LOVE YOU","isBold":true},{"text":"Jeg elsker dig"},{"text":"愛してる"},{"text":"LOVE","isBold":true,"isBright":true},{"text":"TI amo"},{"text":"사랑해"},{"text":"我爱你"},{"text":"LOVE"}],[{"text":"ANH YÊU EM"},{"text":"Anh yêu em"},{"text":"I LOVE YOU","isBold":true},{"text":"AMOUR","isBold":true},{"text":"AMOUR"},{"text":"我爱你"},{"text":"사랑"},{"text":"我爱你"},{"text":"LOVE"}],[{"text":"Rakastan sinua"},{"text":"Aku cinta kamu"},{"text":"Ljubim te","isBold":true},{"text":"Mahal kita"},{"text":"Je t'aime"},{"text":"AMOR","isBold":true},{"text":"我爱你"},{"text":"أحبك"}],[{"text":"I LOVE YOU"},{"text":"Seni seviyorum"},{"text":"Ich liebe dich"},{"text":"Mahal kita"},{"text":"我爱你","isBold":true,"isBright":true},{"text":"أحبك"},{"text":"我爱你"},{"text":"รักคุณ"},{"text":"사랑해"}],[{"text":"Ich liebe dich"},{"text":"Nakupenda"},{"text":"愛してる","isBold":true},{"text":"Ljubim te"},{"text":"AMOUR"},{"text":"사랑"},{"text":"我爱你"},{"text":"사랑해"}],[{"text":"אני אוהבת אותך"},{"text":"Rakastan sinua"},{"text":"AMOUR","isBold":true},{"text":"Szeretlek"},{"text":"사랑해"},{"text":"Te amo"},{"text":"LIEBE","isBold":true},{"text":"أحبك"}],[{"text":"Anh yêu em"},{"text":"愛してる","isBold":true},{"text":"TI AMO","isBold":true},{"text":"Σ' αγαπώ"},{"text":"사랑해"},{"text":"LIEBE"},{"text":"사랑"},{"text":"AMOR"}],[{"text":"నిన్ను ప్రేమిస్తున్నాను"},{"text":"TE AMO","isBold":true},{"text":"Nakupenda"},{"text":"รักคุณ","isBold":true},{"text":"사랑해"},{"text":"사랑해"},{"text":"LOVE"},{"text":"我爱你"}],[{"text":"Anh yêu em"},{"text":"Te iubesc"},{"text":"Ti amo","isBold":true,"isBright":true},{"text":"Ti amo"},{"text":"AMOR"},{"text":"愛してる"},{"text":"사랑해"},{"text":"أحبك"}],[{"text":"Mahal kita"},{"text":"Szeretlek"},{"text":"Szeretlek"},{"text":"我爱你"},{"text":"사랑"},{"text":"사랑해"},{"text":"我爱你"},{"text":"รักคุณ"}],[{"text":"TE QUIERO","isBold":true},{"text":"LOVE YOU"},{"text":"Ljubim te"},{"text":"我爱你"},{"text":"我爱你"},{"text":"รักคุณ"},{"text":"愛してる"}],[{"text":"Σ' αγαπώ","isBold":true},{"text":"Mahal kita"},{"text":"LOVE","isBold":true},{"text":"LOVE"},{"text":"사랑"},{"text":"أحبك"},{"text":"รักคุณ"},{"text":"أحبك"}],[{"text":"我爱你"},{"text":"LOVE"},{"text":"사랑해"},{"text":"愛"},{"text":"  "},{"text":"사랑"},{"text":"사랑"},{"text":"รักคุณ"},{"text":"LIEBE"}],[{"text":"LOVE"},{"text":"사랑"},{"text":"أحبك"},{"text":"    "},{"text":"我爱你"},{"text":"أحبك"},{"text":"LOVE"}],[{"text":"أحبك"},{"text":"사랑"},{"text":"愛"},{"text":"    "},{"text":"我爱你"},{"text":"أحبك"},{"text":"愛"}],[{"text":"أحبك"},{"text":"LOVE"},{"text":"      "},{"text":"รักคุณ"},{"text":"사랑"}],[{"text":"LOVE"},{"text":"        "},{"text":"我爱你"}],[{"text":"사랑"},{"text":"          "},{"text":"أحبك"}]];
+    const ROSE_STEM = {"calyx":[[{"text":"AMOR"}],[{"text":"사랑해"}],[{"text":"我爱你"},{"text":"我爱你"}],[{"text":"Amour"}],[{"text":"AMOR"},{"text":"我爱你"}],[{"text":"사랑해"}]],"leftLeaf":[[{"text":"Ti amo"},{"text":"사랑해"},{"text":"Ti amo"}],[{"text":"Amour"},{"text":"Ti amo"},{"text":"我爱你"},{"text":"LOVE"},{"text":"사랑해"}],[{"text":"사랑해"},{"text":"사랑해"},{"text":"LOVE"},{"text":"Te amo"},{"text":"我爱你"}],[{"text":"사랑해"},{"text":"AMOR"},{"text":"LOVE"},{"text":"LOVE"},{"text":"Amour"}],[{"text":"愛してる"},{"text":"사랑해"},{"text":"我爱你"},{"text":"AMOR"},{"text":"我爱你"}],[{"text":"Amour"},{"text":"AMOR"},{"text":"AMOR"},{"text":"LOVE"}]],"rightLeaf":[[{"text":"AMOR"},{"text":"LOVE"},{"text":"사랑해"}],[{"text":"Te amo"},{"text":"LOVE"},{"text":"Amour"},{"text":"Amour"}],[{"text":"Miluji tě"},{"text":"Amour"},{"text":"LOVE"},{"text":"我爱你"},{"text":"LOVE"}],[{"text":"Te amo"},{"text":"LOVE"},{"text":"Ti amo"},{"text":"我爱你"},{"text":"사랑해"}],[{"text":"사랑해"},{"text":"LOVE"},{"text":"LOVE"},{"text":"我爱你"},{"text":"AMOR"}]],"lowerStem":[[{"text":"사랑해"},{"text":"我爱你"}],[{"text":"LOVE"},{"text":"我爱你"},{"text":"LOVE"},{"text":"Ti amo"},{"text":"사랑해"},{"text":"我爱你"}],[{"text":"사랑해"},{"text":"我爱你"}],[{"text":"我爱你"}],[{"text":"我爱你"},{"text":"LOVE"}],[{"text":"Amour"}],[{"text":"我爱你"},{"text":"사랑해"}],[{"text":"사랑해"}],[{"text":"AMORE"}],[{"text":"LOVE"}],[{"text":"我爱你"}],[{"text":"LOVE"}],[{"text":"我爱你"}],[{"text":"我爱你"}]]};
+    const LILY_ROWS = [[{"text":"AMOR","isBold":true,"isBright":true}],[{"text":"I LOVE YOU","isBold":true,"isBright":true}],[{"text":"Je t'aime"},{"text":"愛してる","isBold":true}],[{"text":"사랑해"},{"text":"Te amo","isBold":true},{"text":"Nakupenda"}],[{"text":"Ik hou van jou"},{"text":"TE AMO","isBold":true},{"text":"LOVE","isBright":true},{"text":"Ich liebe dich"},{"text":"أحبك"}],[{"text":"Seni seviyorum"},{"text":"Mahal kita"},{"text":"사랑해","isBold":true},{"text":"我爱你"},{"text":"Kocham cię"},{"text":"Eu te amo"}],[{"text":"Я тебя люблю"},{"text":"TI AMO","isBold":true},{"text":"AMOUR","isBright":true},{"text":"사랑해"},{"text":"TE AMO"},{"text":"รักคุณ"},{"text":"Jag älskar dig"}],[{"text":"నిన్ను ప్రేమిస్తున్నాను"},{"text":"I LOVE YOU","isBold":true},{"text":"AMORE"},{"text":"愛してる","isBold":true},{"text":"AMOR"},{"text":"AMOR","isBold":true},{"text":"ฉันรักเธอ"}],[{"text":"Anh yêu em"},{"text":"TE QUIERO","isBold":true},{"text":"LOVE YOU"},{"text":"Szeretlek"},{"text":"我爱你"},{"text":"LOVE","isBold":true,"isBright":true},{"text":"사랑해"}],[{"text":"Mahal kita"},{"text":"Ich liebe dich"},{"text":"Je t'aime","isBold":true},{"text":"I LOVE YOU","isBold":true,"isBright":true},{"text":"愛してる"},{"text":"Te amo"},{"text":"أحبك"}],[{"text":"I LOVE YOU"},{"text":"TE AMO","isBold":true,"isBright":true},{"text":"Jag älskar dig"},{"text":"愛してる"},{"text":"我爱你"},{"text":"LOVE","isBold":true},{"text":"LOVE"},{"text":"รักคุณ"}],[{"text":"Jeg elsker dig"},{"text":"Kocham cię"},{"text":"AMOUR","isBold":true},{"text":"TE AMO"},{"text":"ভালোবাসি"},{"text":"我爱你"},{"text":"LOVE"},{"text":"愛"}],[{"text":"Rakastan sinua"},{"text":"Aku cinta kamu"},{"text":"Ljubim te"},{"text":"Mahal kita"},{"text":"AMOR","isBold":true},{"text":"我爱你"},{"text":"أحبك"}],[{"text":"Anh yêu em"},{"text":"愛してる","isBold":true},{"text":"TI AMO"},{"text":"Σ' αγαπώ"},{"text":"사랑해"},{"text":"LIEBE"},{"text":"사랑"},{"text":"AMOR"}],[{"text":"నిన్ను ప్రేమిస్తున్నాను"},{"text":"TE AMO","isBold":true},{"text":"Nakupenda"},{"text":"รักคุณ"},{"text":"사랑해"},{"text":"LOVE"},{"text":"我爱你"}],[{"text":"Anh yêu em"},{"text":"Te iubesc"},{"text":"Ti amo","isBold":true,"isBright":true},{"text":"AMOR"},{"text":"愛してる"},{"text":"사랑해"},{"text":"أحبك"}],[{"text":"Mahal kita"},{"text":"Szeretlek"},{"text":"我爱你"},{"text":"사랑"},{"text":"사랑해"},{"text":"รักคุณ"}],[{"text":"TE QUIERO","isBold":true},{"text":"LOVE YOU"},{"text":"Ljubim te"},{"text":"我爱你"},{"text":"愛してる"}],[{"text":"Σ' αγαπώ"},{"text":"Mahal kita"},{"text":"LOVE","isBold":true},{"text":"사랑"},{"text":"أحبك"}],[{"text":"我爱你"},{"text":"LOVE","isBold":true,"isBright":true},{"text":"사랑해"}],[{"text":"사랑"},{"text":"أحبك"},{"text":"LOVE"}],[{"text":"✦ LOVE ✦","isBold":true,"isBright":true}]];
+    const LILY_STAMENS = [{"text":"✦ AMOR ✦","angleOffset":-0.85,"dist":0.75},{"text":"✦ 愛してる ✦","angleOffset":-0.45,"dist":0.9},{"text":"✦ I LOVE YOU ✦","angleOffset":-0.15,"dist":0.98},{"text":"✦ TE AMO ✦","angleOffset":0.2,"dist":0.95},{"text":"✦ 사랑해 ✦","angleOffset":0.55,"dist":0.88},{"text":"✦ 我爱你 ✦","angleOffset":0.9,"dist":0.75}];
+    const LILY_FOLIAGE = {"calyx":[[{"text":"AMOR"}],[{"text":"사랑해"}],[{"text":"我爱你"},{"text":"我爱你"}],[{"text":"Amour"}]],"upperLeaves":{"left":[[{"text":"Ti amo"},{"text":"사랑해"}],[{"text":"Amour"},{"text":"Ti amo"},{"text":"我爱你"},{"text":"LOVE"}],[{"text":"사랑해"},{"text":"Te amo"},{"text":"LOVE"}]],"right":[[{"text":"AMOR"},{"text":"LOVE"}],[{"text":"Te amo"},{"text":"LOVE"},{"text":"Amour"},{"text":"사랑해"}],[{"text":"Miluji tě"},{"text":"LOVE"},{"text":"我爱你"}]]},"lowerStem":[[{"text":"사랑해"},{"text":"我爱你"}],[{"text":"LOVE"},{"text":"我爱你"},{"text":"LOVE"},{"text":"Ti amo"}],[{"text":"사랑해"},{"text":"我爱你"}],[{"text":"我爱你"}],[{"text":"我爱你"},{"text":"LOVE"}],[{"text":"Amour"}],[{"text":"我爱你"},{"text":"사랑해"}],[{"text":"사랑해"}],[{"text":"AMORE"}],[{"text":"LOVE"}],[{"text":"我爱你"}],[{"text":"LOVE"}],[{"text":"我爱你"}]]};
+    const LOVE_PHRASES = [{"id":"fr","phrase":"Je t'aime","language":"French","native":"Français","pronunciation":"zhuh tem","region":"Europe","flag":"🇫🇷","funFact":"In French, 'Je t'aime' is deeply reserved for true, passionate love. Adding 'bien' actually waters it down to 'I like you'!"},{"id":"es","phrase":"Te amo","language":"Spanish","native":"Español","pronunciation":"teh AH-moh","region":"Americas","flag":"🇪🇸","funFact":"'Te amo' is the highest poetic declaration of lifelong love in Spanish, while 'Te quiero' expresses everyday affection."},{"id":"it","phrase":"Ti amo","language":"Italian","native":"Italiano","pronunciation":"tee AH-moh","region":"Europe","flag":"🇮🇹","funFact":"Italian reserves 'Ti amo' strictly for romantic soulmates, while friends and family hear 'Ti voglio bene' (I want the best for you)."},{"id":"de","phrase":"Ich liebe dich","language":"German","native":"Deutsch","pronunciation":"ikh LEE-buh dikh","region":"Europe","flag":"🇩🇪","funFact":"Germans rarely utter 'Ich liebe dich' casually; when spoken, it carries solemn honesty and profound commitment."},{"id":"ja","phrase":"愛してる","language":"Japanese","native":"日本語","pronunciation":"aishiteru (ah-ee-shee-teh-roo)","region":"Asia","flag":"🇯🇵","funFact":"In Japanese culture, 'Aishiteru' is so weighty and sacred that novelist Soseki Natsume famously translated it as 'The moon is beautiful, isn't it?'"},{"id":"zh","phrase":"我爱你","language":"Mandarin Chinese","native":"中文 (简体)","pronunciation":"wǒ ài nǐ (woh eye nee)","region":"Asia","flag":"🇨🇳","funFact":"The Chinese character for love (愛) features a heart (心) nestled gently in the center between accepting arms."},{"id":"ko","phrase":"사랑해","language":"Korean","native":"한국어","pronunciation":"saranghae (sah-rahng-heh)","region":"Asia","flag":"🇰🇷","funFact":"The pure Korean root 'sarang' (사랑) is etymologically connected to 'thinking deeply of someone' and keeping them in mind."},{"id":"ru","phrase":"Я тебя люблю","language":"Russian","native":"Русский","pronunciation":"ya tebya lyublyu","region":"Europe","flag":"🇷🇺","funFact":"Because Russian word order is flexible, poets write 'Люблю тебя я' or 'Тебя люблю' to place lyrical emphasis on the beloved."},{"id":"tr","phrase":"Seni seviyorum","language":"Turkish","native":"Türkçe","pronunciation":"seh-nee seh-vee-yor-oom","region":"Middle East","flag":"🇹🇷","funFact":"Derived from 'sevgi' (pure love). Turkish literature boasts some of the most heartrending mystical love poems (Divan poetry)."},{"id":"tl","phrase":"Mahal kita","language":"Tagalog / Filipino","native":"Tagalog","pronunciation":"mah-hal kee-tah","region":"Asia","flag":"🇵🇭","funFact":"The word 'Mahal' also means 'precious' and 'priceless'—to love someone in Tagalog means to treasure them as beyond price."},{"id":"ar","phrase":"أحبك","language":"Arabic","native":"العربية","pronunciation":"uhibbuka (to him) / uhibbuki (to her)","region":"Middle East","flag":"🇦🇪","funFact":"The Arabic language possesses over 11 distinct ascending stages of love, from 'Hawa' (attraction) to 'Ishq' (burning passion) and 'Huyum' (insane adoration)."},{"id":"hi","phrase":"मैं तुमसे प्यार करता हूँ","language":"Hindi","native":"हिन्दी","pronunciation":"main tumse pyaar karta hoon","region":"Asia","flag":"🇮🇳","funFact":"The word 'Pyaar' traces back to Sanskrit 'Priya', symbolizing dear, cherished, and an eternal divine bond like Radha-Krishna."},{"id":"pt","phrase":"Eu te amo","language":"Portuguese","native":"Português","pronunciation":"eh-oo chee AH-moo","region":"Americas","flag":"🇧🇷","funFact":"Portuguese is famous for the untranslatable word 'Saudade'—the sweet, aching melancholy longing for the one you love."},{"id":"el","phrase":"Σ' αγαπώ","language":"Greek","native":"Ελληνικά","pronunciation":"s'agapo (sah-gah-POH)","region":"Europe","flag":"🇬🇷","funFact":"Rooted in 'Agape' (ἀγάπη), considered by ancient Greek philosophers the highest, most selfless form of unconditional universal devotion."},{"id":"nl","phrase":"Ik hou van jou","language":"Dutch","native":"Nederlands","pronunciation":"ik how fahn yow","region":"Europe","flag":"🇳🇱","funFact":"Literally translates to 'I hold of you'—signifying keeping someone protected, cherished, and embraced safely in one's heart."},{"id":"pl","phrase":"Kocham Cię","language":"Polish","native":"Polski","pronunciation":"KOH-khahm chyeh","region":"Europe","flag":"🇵🇱","funFact":"The word 'kochać' carries a gentle warmth reminiscent of caressing or cradling something infinitely precious."},{"id":"sv","phrase":"Jag älskar dig","language":"Swedish","native":"Svenska","pronunciation":"yahg EL-skar dey","region":"Europe","flag":"🇸🇪","funFact":"Derived from Old Norse 'elska', which meant to nurture, protect, and care tenderly through cold Nordic winters."},{"id":"sw","phrase":"Nakupenda","language":"Swahili","native":"Kiswahili","pronunciation":"nah-koo-PEN-dah","region":"Africa","flag":"🇰🇪","funFact":"Formed as an elegant single verb: 'na-' (present tense), '-ku-' (you), '-penda' (to love warmly)."},{"id":"ga","phrase":"Táim i ngrá leat","language":"Irish Gaelic","native":"Gaeilge","pronunciation":"taw-im ih ngraw lyat","region":"Europe","flag":"🇮🇪","funFact":"Literally means 'I am in love with you', or poetically 'Mo chuisle' (my pulse / beat of my heart)."},{"id":"haw","phrase":"Aloha au iā 'oe","language":"Hawaiian","native":"‘Ōlelo Hawai‘i","pronunciation":"ah-LOH-hah ow ee-AH oh-eh","region":"Oceania","flag":"🌺","funFact":"'Aloha' conveys sharing the divine breath of life ('ha') in the presence ('alo') of sacred warmth."},{"id":"bn","phrase":"আমি তোমাকে ভালোবাসি","language":"Bengali","native":"বাংলা","pronunciation":"ami tomake bhalobashi","region":"Asia","flag":"🇧🇩","funFact":"The language of Nobel poet Rabindranath Tagore, where 'Bhalobasha' literally translates as 'making a home of goodness'."},{"id":"id","phrase":"Aku cinta kamu","language":"Indonesian","native":"Bahasa Indonesia","pronunciation":"ah-koo chin-tah kah-moo","region":"Asia","flag":"🇮🇩","funFact":"'Cinta' traces back to Sanskrit 'Cintā', signifying constant contemplation and sweet mindful wonder."},{"id":"vi","phrase":"Anh yêu em","language":"Vietnamese","native":"Tiếng Việt","pronunciation":"ahn eeyew em","region":"Asia","flag":"🇻🇳","funFact":"Pronouns in Vietnamese express tender relation—'Anh' (older/protective brother) loving 'Em' (beloved gentle flower)."},{"id":"th","phrase":"ฉันรักเธอ","language":"Thai","native":"ไทย","pronunciation":"chan rak thoe (or phom rak khun)","region":"Asia","flag":"🇹🇭","funFact":"The word 'Rak' (รัก) is shared across millennia of Buddhist and courtly poetry to denote devotional warmth."},{"id":"hu","phrase":"Szeretlek","language":"Hungarian","native":"Magyar","pronunciation":"SEH-ret-lek","region":"Europe","flag":"🇭🇺","funFact":"Hungarian grammar compresses subject and object into a single intimate verb ending: 'I love YOU'."},{"id":"ro","phrase":"Te iubesc","language":"Romanian","native":"Română","pronunciation":"teh yoo-BESK","region":"Europe","flag":"🇷🇴","funFact":"A Romance language that adopted the Slavic root for love ('ljub'), creating a uniquely sweet lyrical blend."},{"id":"uk","phrase":"Я тебе кохаю","language":"Ukrainian","native":"Українська","pronunciation":"ya tebe kohayu","region":"Europe","flag":"🇺🇦","funFact":"'Кохати' is reserved exclusively for deep, tender romantic passion, distinct from liking things or friendships."},{"id":"cs","phrase":"Miluji tě","language":"Czech","native":"Čeština","pronunciation":"MEE-loo-yee tyeh","region":"Europe","flag":"🇨🇿","funFact":"Prague on May 1st (Czech Day of Love) sees thousands of couples kissing under blooming cherry blossom trees!"},{"id":"fa","phrase":"دوستت دارم","language":"Persian (Farsi)","native":"فارسی","pronunciation":"doostat daram","region":"Middle East","flag":"🇮🇷","funFact":"Persian poetry by Rumi and Hafez is celebrated as the pinnacle of divine and romantic love literature."},{"id":"he","phrase":"אני אוהב אותך","language":"Hebrew","native":"עברית","pronunciation":"ani ohev otach (m to f)","region":"Middle East","flag":"🇮🇱","funFact":"The root 'Ahav' appears throughout King Solomon's Song of Songs: 'I am my beloved’s, and my beloved is mine'."},{"id":"da","phrase":"Jeg elsker dig","language":"Danish","native":"Dansk","pronunciation":"yai el-sker dai","region":"Europe","flag":"🇩🇰","funFact":"Deeply connected to the Danish concept of 'hygge'—warm candlelight, closeness, and feeling safe together."},{"id":"no","phrase":"Jeg elsker deg","language":"Norwegian","native":"Norsk","pronunciation":"yai el-sker dai","region":"Europe","flag":"🇳🇴","funFact":"Shared with the majestic fjords and Northern Lights, representing enduring loyalty under Arctic skies."},{"id":"fi","phrase":"Minä rakastan sinua","language":"Finnish","native":"Suomi","pronunciation":"mee-na RAH-kas-tahn SEE-noo-ah","region":"Europe","flag":"🇫🇮","funFact":"Finns are famous for quiet sincerity; to hear 'Minä rakastan sinua' is considered an unbreakable lifelong vow."},{"id":"ur","phrase":"میں آپ سے محبت کرتا ہوں","language":"Urdu","native":"اردو","pronunciation":"main aap se mohabbat karta hoon","region":"Asia","flag":"🇵🇰","funFact":"'Mohabbat' and 'Ishq' in Urdu Ghazals are revered as forms of profound worship and spiritual devotion."},{"id":"ta","phrase":"நான் உன்னை காதலிக்கிறேன்","language":"Tamil","native":"தமிழ்","pronunciation":"Naan unnai kaadhalikkiren","region":"Asia","flag":"🇮🇳","funFact":"Tamil Sangam literature classified romantic poems into five natural landscapes (Kurinji, Mullai, Marutham, Neythal, Palai)."},{"id":"ms","phrase":"Saya sayang awak","language":"Malay","native":"Bahasa Melayu","pronunciation":"sah-yah sah-yahng ah-wahk","region":"Asia","flag":"🇲🇾","funFact":"'Sayang' means both love and sweet affectionate care, used also as a tender term of endearment like 'darling'."},{"id":"la","phrase":"Te amo","language":"Latin","native":"Latina","pronunciation":"tay AH-moh","region":"Europe","flag":"🏛️","funFact":"Immortalized by Catullus: 'Odi et amo' (I hate and I love) and Virgil: 'Amor vincit omnia' (Love conquers all)."},{"id":"eo","phrase":"Mi amas vin","language":"Esperanto","native":"Esperanto","pronunciation":"mee AH-mahs veen","region":"Europe","flag":"🌍","funFact":"Created as a universal bridge across all nations, 'Mi amas vin' was designed so any two humans on Earth could speak love."},{"id":"zu","phrase":"Ngiyakuthanda","language":"Zulu","native":"isiZulu","pronunciation":"ng-ee-yah-koo-TAHN-dah","region":"Africa","flag":"🇿🇦","funFact":"Rooted in the philosophy of Ubuntu ('I am because we are')—love is viewed as an interconnected life force."},{"id":"am","phrase":"እወድሻለሁ","language":"Amharic","native":"አማርኛ","pronunciation":"ewedishalehu (to her)","region":"Africa","flag":"🇪🇹","funFact":"Ancient Semitic Ge'ez script, spoken in Ethiopia, carrying melodies sung across millennium-old highland traditions."},{"id":"sq","phrase":"Të dua","language":"Albanian","native":"Shqip","pronunciation":"tuh DOO-ah","region":"Europe","flag":"🇦🇱","funFact":"'Të dua' means both 'I love you' and 'I want you', expressing total desire and devotion in two pure syllables."},{"id":"hr","phrase":"Volim te","language":"Croatian / Serbian","native":"Hrvatski / Srpski","pronunciation":"VOH-leem teh","region":"Europe","flag":"🇭🇷","funFact":"Traces to Proto-Slavic root 'volja' meaning 'will', signifying 'I choose you with all my free will and desire'."},{"id":"ka","phrase":"მიყვარხარ","language":"Georgian","native":"ქართული","pronunciation":"miqvarkhar","region":"Europe","flag":"🇬🇪","funFact":"Written in the unique rounded Mkhedruli script, spoken in the ancient birthplace of wine and mountain legends."},{"id":"is","phrase":"Ég elska þig","language":"Icelandic","native":"Íslenska","pronunciation":"yehg EL-skah theeg","region":"Europe","flag":"🇮🇸","funFact":"Preserves virtually unchanged Old Norse grammar from the Viking sagas of the 9th century."},{"id":"sk","phrase":"Ľúbim ťa","language":"Slovak","native":"Slovenčina","pronunciation":"LYOO-beem tyah","region":"Europe","flag":"🇸🇰","funFact":"Slovaks use 'Ľúbim ťa' for romantic sweetness and 'Milujem ťa' for solemn eternal devotion."},{"id":"cy","phrase":"Rwy’n dy garu di","language":"Welsh","native":"Cymraeg","pronunciation":"roo-in duh gah-ree dee","region":"Europe","flag":"🏴󠁧󠁢󠁷󠁬󠁳󠁿","funFact":"Wales celebrates St. Dwynwen's Day (the Welsh patron saint of lovers) on January 25 with hand-carved lovespoons!"},{"id":"eu","phrase":"Maite zaitut","language":"Basque","native":"Euskara","pronunciation":"my-teh zye-toot","region":"Europe","flag":"🇪🇸","funFact":"Basque is a language isolate with zero known living relatives, carrying this love phrase through tens of thousands of years."},{"id":"km","phrase":"ខ្ញុំស្រលាញ់អ្នក","language":"Khmer","native":"ភាសាខ្មែរ","pronunciation":"knhom sralanh anak","region":"Asia","flag":"🇰🇭","funFact":"Rendered in ornate Angkor Wat-era script, embodying gentle respect and enduring heart fidelity."},{"id":"my","phrase":"မင်းကိုချစ်တယ်","language":"Burmese","native":"မြန်မာစာ","pronunciation":"min ko chit tal","region":"Asia","flag":"🇲🇲","funFact":"Written with graceful circular letters that originated from carving inscriptions on fragile palm leaves."},{"id":"ne","phrase":"म तिमीलाई माया गर्छु","language":"Nepali","native":"नेपाली","pronunciation":"ma timīlāī māyā garchu","region":"Asia","flag":"🇳🇵","funFact":"The word 'Māyā' carries both sweet romantic love and the mystical, magical beauty of the cosmos."}];
+    const RECIPIENT_NAME = "";
+
+    // Color Palettes
+    const PALETTES = {
+      pink_rose: {
+        petals: ['#ff2d75', '#ff69b4', '#f43f5e', '#fda4af', '#fbcfe8', '#ff1493'],
+        highlights: ['#ffffff', '#fbcfe8'],
+        stem: ['#22c55e', '#4ade80', '#10b981', '#86efac', '#16a34a']
+      },
+      red_rose: {
+        petals: ['#ff1744', '#e11d48', '#f43f5e', '#be123c', '#fda4af'],
+        highlights: ['#ffffff', '#fda4af'],
+        stem: ['#22c55e', '#4ade80', '#10b981', '#86efac', '#16a34a']
+      },
+      pink_lily: {
+        petals: ['#ff2d75', '#ec4899', '#f472b6', '#db2777', '#fbcfe8', '#fda4af'],
+        highlights: ['#ffffff', '#fef08a'],
+        stem: ['#22c55e', '#4ade80', '#10b981', '#86efac', '#16a34a']
+      },
+      golden_sunflower: {
+        petals: ['#fbbf24', '#f59e0b', '#d97706', '#fef08a', '#fde68a', '#b45309'],
+        highlights: ['#ffffff', '#fef3c7'],
+        stem: ['#65a30d', '#84cc16', '#4d7c0f', '#a3e635', '#22c55e']
+      },
+      royal_tulip: {
+        petals: ['#c084fc', '#a855f7', '#9333ea', '#e879f9', '#f472b6', '#e9d5ff'],
+        highlights: ['#ffffff', '#f5d0fe'],
+        stem: ['#10b981', '#22c55e', '#34d399', '#4ade80', '#059669']
+      },
+      white_rose: {
+        petals: ['#ffffff', '#f8fafc', '#f1f5f9', '#e2e8f0', '#cbd5e1', '#e0e7ff'],
+        highlights: ['#ffffff', '#f8fafc'],
+        stem: ['#10b981', '#22c55e', '#34d399', '#4ade80', '#059669']
+      }
+    };
+
+    // Global State
+    let currentFlower = "pink_rose";
+    let bloomProgress = 1.0;
+    let isPlaying = false;
+    let animFrameId = null;
+    let cachedElements = [];
+    let hoveredElement = null;
+
+    // DOM Elements
+    const canvas = document.getElementById('flowerCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('cardContainer');
+    const bloomRange = document.getElementById('bloomRange');
+    const progressLabel = document.getElementById('progressLabel');
+    const playBtn = document.getElementById('playBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const tooltip = document.getElementById('tooltip');
+    const tooltipLang = document.getElementById('tooltipLang');
+    const tooltipText = document.getElementById('tooltipText');
+    const recipientBadge = document.getElementById('recipientBadge');
+    const recipientSpan = document.getElementById('recipientSpan');
+
+    if (RECIPIENT_NAME) {
+      recipientBadge.style.display = 'inline-block';
+      recipientSpan.textContent = RECIPIENT_NAME;
+    }
+
+    // Helper: Find phrase metadata
+    const phraseMap = new Map();
+    LOVE_PHRASES.forEach(p => {
+      phraseMap.set(p.phrase.toLowerCase(), p);
+    });
+
+    function getPhraseForWord(word) {
+      const w = word.trim().toLowerCase();
+      if (phraseMap.has(w)) return phraseMap.get(w);
+      for (const p of LOVE_PHRASES) {
+        if (w.includes(p.phrase.toLowerCase()) || p.phrase.toLowerCase().includes(w)) {
+          return p;
+        }
+      }
+      return {
+        id: 'love',
+        phrase: word,
+        language: 'World',
+        native: word,
+        pronunciation: word,
+        flag: '💖',
+        funFact: 'A sacred declaration of true love.'
+      };
+    }
+
+    // Generator function for Canvas Elements
+    function generateElements(flowerType, width, height) {
+      const elements = [];
+      const cx = width / 2;
+      const cy = height * 0.36;
+      const scale = Math.min(width, height) / 520;
+      const palette = PALETTES[flowerType] || PALETTES.pink_rose;
+      let idCounter = 0;
+
+      if (flowerType === 'pink_rose' || flowerType === 'red_rose' || flowerType === 'white_rose') {
+        const headRowHeight = Math.max(13, Math.round(15.5 * scale));
+        const headStartY = cy - (ROSE_HEAD.length * headRowHeight * 0.52);
+
+        ROSE_HEAD.forEach((row, rowIndex) => {
+          const y = Math.round(headStartY + rowIndex * headRowHeight);
+          const validWords = row.filter(w => w.text.trim().length > 0);
+          if (!validWords.length) return;
+
+          const wordSpans = validWords.map(w => {
+            const isLarge = w.isBold || w.isBright;
+            const fontSize = Math.max(9.5, Math.round((isLarge ? 12.5 : 10.5) * scale));
+            const wWidth = Math.round(w.text.length * fontSize * 0.62);
+            return { ...w, fontSize, width: wWidth };
+          });
+
+          const gap = Math.max(7, Math.round(9.5 * scale));
+          const totalW = wordSpans.reduce((a, b) => a + b.width, 0) + (wordSpans.length - 1) * gap;
+          let curX = cx - totalW / 2;
+
+          wordSpans.forEach(w => {
+            const wordCenterX = Math.round(curX + w.width / 2);
+            let color;
+            if (w.isBright) color = palette.highlights[0];
+            else if (w.isBold) color = palette.petals[0];
+            else color = palette.petals[(rowIndex + idCounter) % palette.petals.length];
+
+            elements.push({
+              id: `rose-head-${idCounter++}`,
+              phrase: getPhraseForWord(w.text),
+              text: w.text,
+              x: wordCenterX,
+              y: y,
+              width: w.width,
+              height: w.fontSize + 4,
+              fontSize: w.fontSize,
+              fontWeight: w.isBold ? '800' : '600',
+              color: color,
+              part: 'petal',
+              order: 0.32 + (1 - rowIndex / ROSE_HEAD.length) * 0.68,
+              isGreen: false
+            });
+            curX += w.width + gap;
+          });
+        });
+
+        // Stem & Calyx
+        const calyxStartY = headStartY + (ROSE_HEAD.length * headRowHeight) + Math.round(6 * scale);
+        ROSE_STEM.calyx.forEach((row, rIdx) => {
+          const y = Math.round(calyxStartY + rIdx * headRowHeight);
+          const gap = Math.max(6, Math.round(8 * scale));
+          const wordSpans = row.map(w => {
+            const fontSize = Math.max(9.5, Math.round(10.5 * scale));
+            return { ...w, fontSize, width: Math.round(w.text.length * fontSize * 0.62) };
+          });
+          const totalW = wordSpans.reduce((a, b) => a + b.width, 0) + (wordSpans.length - 1) * gap;
+          let curX = cx - totalW / 2;
+
+          wordSpans.forEach(w => {
+            elements.push({
+              id: `calyx-${idCounter++}`,
+              phrase: getPhraseForWord(w.text),
+              text: w.text,
+              x: Math.round(curX + w.width / 2),
+              y: y,
+              width: w.width,
+              height: w.fontSize + 4,
+              fontSize: w.fontSize,
+              fontWeight: '700',
+              color: palette.stem[(rIdx + idCounter) % palette.stem.length],
+              part: 'stem',
+              order: 0.22 - (rIdx * 0.02),
+              isGreen: true
+            });
+            curX += w.width + gap;
+          });
+        });
+
+        // Left Leaf
+        const leftLeafStartY = calyxStartY + (ROSE_STEM.calyx.length * headRowHeight) + 4;
+        ROSE_STEM.leftLeaf.forEach((row, rIdx) => {
+          const y = Math.round(leftLeafStartY + rIdx * headRowHeight);
+          const gap = Math.max(6, Math.round(8 * scale));
+          const wordSpans = row.map(w => {
+            const fontSize = Math.max(9, Math.round(10 * scale));
+            return { ...w, fontSize, width: Math.round(w.text.length * fontSize * 0.62) };
+          });
+          const totalW = wordSpans.reduce((a, b) => a + b.width, 0) + (wordSpans.length - 1) * gap;
+          const rightEdge = cx - (12 * scale);
+          let curX = rightEdge - totalW;
+
+          wordSpans.forEach(w => {
+            elements.push({
+              id: `left-leaf-${idCounter++}`,
+              phrase: getPhraseForWord(w.text),
+              text: w.text,
+              x: Math.round(curX + w.width / 2),
+              y: y,
+              width: w.width,
+              height: w.fontSize + 4,
+              fontSize: w.fontSize,
+              fontWeight: '700',
+              color: palette.stem[(rIdx + idCounter) % palette.stem.length],
+              part: 'leaf',
+              order: 0.15 + (rIdx / 15),
+              isGreen: true
+            });
+            curX += w.width + gap;
+          });
+        });
+
+        // Right Leaf
+        const rightLeafStartY = leftLeafStartY + (headRowHeight * 2);
+        ROSE_STEM.rightLeaf.forEach((row, rIdx) => {
+          const y = Math.round(rightLeafStartY + rIdx * headRowHeight);
+          const gap = Math.max(6, Math.round(8 * scale));
+          const wordSpans = row.map(w => {
+            const fontSize = Math.max(9, Math.round(10 * scale));
+            return { ...w, fontSize, width: Math.round(w.text.length * fontSize * 0.62) };
+          });
+          let curX = cx + (14 * scale);
+
+          wordSpans.forEach(w => {
+            elements.push({
+              id: `right-leaf-${idCounter++}`,
+              phrase: getPhraseForWord(w.text),
+              text: w.text,
+              x: Math.round(curX + w.width / 2),
+              y: y,
+              width: w.width,
+              height: w.fontSize + 4,
+              fontSize: w.fontSize,
+              fontWeight: '700',
+              color: palette.stem[(rIdx + idCounter) % palette.stem.length],
+              part: 'leaf',
+              order: 0.18 + (rIdx / 15),
+              isGreen: true
+            });
+            curX += w.width + gap;
+          });
+        });
+
+        // Lower Stem
+        const lowerStemStartY = leftLeafStartY + (ROSE_STEM.leftLeaf.length * headRowHeight);
+        ROSE_STEM.lowerStem.forEach((row, rIdx) => {
+          const y = Math.round(lowerStemStartY + rIdx * headRowHeight);
+          const gap = Math.max(6, Math.round(8 * scale));
+          const wordSpans = row.map(w => {
+            const fontSize = Math.max(9, Math.round(10 * scale));
+            return { ...w, fontSize, width: Math.round(w.text.length * fontSize * 0.62) };
+          });
+          const totalW = wordSpans.reduce((a, b) => a + b.width, 0) + (wordSpans.length - 1) * gap;
+          let curX = cx - totalW / 2;
+
+          wordSpans.forEach(w => {
+            elements.push({
+              id: `lower-stem-${idCounter++}`,
+              phrase: getPhraseForWord(w.text),
+              text: w.text,
+              x: Math.round(curX + w.width / 2),
+              y: y,
+              width: w.width,
+              height: w.fontSize + 4,
+              fontSize: w.fontSize,
+              fontWeight: '700',
+              color: palette.stem[(rIdx + idCounter) % palette.stem.length],
+              part: 'stem',
+              order: 0.05 + (rIdx / 30),
+              isGreen: true
+            });
+            curX += w.width + gap;
+          });
+        });
+
+      } else if (flowerType === 'pink_lily') {
+        const lilyRowHeight = Math.max(13, Math.round(15.5 * scale));
+        const lilyStartY = cy - (LILY_ROWS.length * lilyRowHeight * 0.48);
+
+        LILY_ROWS.forEach((row, rowIndex) => {
+          const y = Math.round(lilyStartY + rowIndex * lilyRowHeight);
+          const wordSpans = row.map(w => {
+            const isLarge = w.isBold || w.isBright;
+            const fontSize = Math.max(9.5, Math.round((isLarge ? 12.5 : 10.5) * scale));
+            return { ...w, fontSize, width: Math.round(w.text.length * fontSize * 0.62) };
+          });
+          const gap = Math.max(7, Math.round(9.5 * scale));
+          const totalW = wordSpans.reduce((a, b) => a + b.width, 0) + (wordSpans.length - 1) * gap;
+          let curX = cx - totalW / 2;
+
+          wordSpans.forEach(w => {
+            let color;
+            if (w.isBright) color = palette.highlights[0];
+            else if (w.isBold) color = palette.petals[0];
+            else color = palette.petals[(rowIndex + idCounter) % palette.petals.length];
+
+            elements.push({
+              id: `lily-petal-${idCounter++}`,
+              phrase: getPhraseForWord(w.text),
+              text: w.text,
+              x: Math.round(curX + w.width / 2),
+              y: y,
+              width: w.width,
+              height: w.fontSize + 4,
+              fontSize: w.fontSize,
+              fontWeight: w.isBold ? '800' : '600',
+              color: color,
+              part: 'petal',
+              order: 0.28 + (1 - rowIndex / LILY_ROWS.length) * 0.72,
+              isGreen: false
+            });
+            curX += w.width + gap;
+          });
+        });
+
+        // Lily Foliage & Stem
+        const foliageStartY = lilyStartY + (LILY_ROWS.length * lilyRowHeight) + 4;
+        LILY_FOLIAGE.stem.forEach((row, rIdx) => {
+          const y = Math.round(foliageStartY + rIdx * lilyRowHeight);
+          const gap = Math.max(6, Math.round(8 * scale));
+          const wordSpans = row.map(w => {
+            const fontSize = Math.max(9, Math.round(10 * scale));
+            return { ...w, fontSize, width: Math.round(w.text.length * fontSize * 0.62) };
+          });
+          const totalW = wordSpans.reduce((a, b) => a + b.width, 0) + (wordSpans.length - 1) * gap;
+          let curX = cx - totalW / 2;
+
+          wordSpans.forEach(w => {
+            elements.push({
+              id: `lily-stem-${idCounter++}`,
+              phrase: getPhraseForWord(w.text),
+              text: w.text,
+              x: Math.round(curX + w.width / 2),
+              y: y,
+              width: w.width,
+              height: w.fontSize + 4,
+              fontSize: w.fontSize,
+              fontWeight: '700',
+              color: palette.stem[(rIdx + idCounter) % palette.stem.length],
+              part: 'stem',
+              order: 0.05 + (rIdx / 25),
+              isGreen: true
+            });
+            curX += w.width + gap;
+          });
+        });
+
+      } else {
+        // Fallback for Sunflower / Tulip
+        const baseRowHeight = Math.max(13, Math.round(15.5 * scale));
+        const baseStartY = cy - (ROSE_HEAD.length * baseRowHeight * 0.52);
+
+        ROSE_HEAD.forEach((row, rowIndex) => {
+          const y = Math.round(baseStartY + rowIndex * baseRowHeight);
+          const validWords = row.filter(w => w.text.trim().length > 0);
+          if (!validWords.length) return;
+
+          const wordSpans = validWords.map(w => {
+            const isLarge = w.isBold || w.isBright;
+            const fontSize = Math.max(9.5, Math.round((isLarge ? 12.5 : 10.5) * scale));
+            return { ...w, fontSize, width: Math.round(w.text.length * fontSize * 0.62) };
+          });
+
+          const gap = Math.max(7, Math.round(9.5 * scale));
+          const totalW = wordSpans.reduce((a, b) => a + b.width, 0) + (wordSpans.length - 1) * gap;
+          let curX = cx - totalW / 2;
+
+          wordSpans.forEach(w => {
+            let color;
+            if (w.isBright) color = palette.highlights[0];
+            else if (w.isBold) color = palette.petals[0];
+            else color = palette.petals[(rowIndex + idCounter) % palette.petals.length];
+
+            elements.push({
+              id: `flower-elem-${idCounter++}`,
+              phrase: getPhraseForWord(w.text),
+              text: w.text,
+              x: Math.round(curX + w.width / 2),
+              y: y,
+              width: w.width,
+              height: w.fontSize + 4,
+              fontSize: w.fontSize,
+              fontWeight: w.isBold ? '800' : '600',
+              color: color,
+              part: 'petal',
+              order: 0.32 + (1 - rowIndex / ROSE_HEAD.length) * 0.68,
+              isGreen: false
+            });
+            curX += w.width + gap;
+          });
+        });
+      }
+
+      // Add Recipient Inscription if present
+      if (RECIPIENT_NAME) {
+        const heartEl = elements.find(e => e.part === 'petal' && Math.abs(e.x - cx) < 60 && Math.abs(e.y - cy) < 60);
+        if (heartEl) {
+          elements.push({
+            id: 'recipient-inscription',
+            phrase: {
+              id: 'dedication',
+              phrase: `For ${RECIPIENT_NAME}`,
+              language: 'Dedication',
+              native: RECIPIENT_NAME,
+              pronunciation: RECIPIENT_NAME,
+              flag: '💖',
+              funFact: 'Dedicated with infinite affection.'
+            },
+            text: `★ ${RECIPIENT_NAME} ★`,
+            x: cx,
+            y: heartEl.y - 18,
+            width: Math.round(RECIPIENT_NAME.length * 14 * 0.65),
+            height: 18,
+            fontSize: Math.round(13 * scale),
+            fontWeight: '900',
+            color: '#ffffff',
+            part: 'petal',
+            order: 0.99,
+            isGreen: false
+          });
+        }
+      }
+
+      return elements;
+    }
+
+    // Canvas Resize & Setup
+    function resizeCanvas() {
+      const rect = container.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cachedElements = generateElements(currentFlower, rect.width, rect.height);
+      draw();
+    }
+
+    // Render Canvas
+    function draw() {
+      const rect = container.getBoundingClientRect();
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, rect.width, rect.height);
+
+      // Vignette effect
+      const grad = ctx.createRadialGradient(rect.width / 2, rect.height * 0.45, 50, rect.width / 2, rect.height * 0.45, rect.width * 0.7);
+      grad.addColorStop(0, 'rgba(255, 45, 117, 0.04)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0.9)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, rect.width, rect.height);
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      cachedElements.forEach(el => {
+        if (el.order > bloomProgress) return;
+
+        const isHovered = hoveredElement && hoveredElement.id === el.id;
+        ctx.font = `${el.fontWeight} ${el.fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`;
+
+        if (isHovered) {
+          ctx.shadowColor = '#ffffff';
+          ctx.shadowBlur = 14;
+          ctx.fillStyle = '#ffffff';
+        } else {
+          ctx.shadowColor = el.color;
+          ctx.shadowBlur = el.isGreen ? 3 : 5;
+          ctx.fillStyle = el.color;
+        }
+
+        ctx.fillText(el.text, el.x, el.y);
+      });
+
+      // Reset shadow
+      ctx.shadowBlur = 0;
+    }
+
+    // Animation Loop
+    function stepBloom() {
+      if (!isPlaying) return;
+      bloomProgress += 0.006;
+      if (bloomProgress >= 1.0) {
+        bloomProgress = 1.0;
+        isPlaying = false;
+        playBtn.textContent = '▶';
+      }
+      bloomRange.value = bloomProgress;
+      progressLabel.textContent = Math.round(bloomProgress * 100) + '%';
+      draw();
+      if (isPlaying) {
+        animFrameId = requestAnimationFrame(stepBloom);
+      }
+    }
+
+    playBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      playBtn.textContent = isPlaying ? '⏸' : '▶';
+      if (isPlaying) {
+        if (bloomProgress >= 1.0) bloomProgress = 0.0;
+        stepBloom();
+      } else {
+        cancelAnimationFrame(animFrameId);
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      isPlaying = false;
+      playBtn.textContent = '▶';
+      cancelAnimationFrame(animFrameId);
+      bloomProgress = 0.0;
+      bloomRange.value = 0.0;
+      progressLabel.textContent = '0%';
+      draw();
+      setTimeout(() => {
+        isPlaying = true;
+        playBtn.textContent = '⏸';
+        stepBloom();
+      }, 250);
+    });
+
+    bloomRange.addEventListener('input', (e) => {
+      isPlaying = false;
+      playBtn.textContent = '▶';
+      cancelAnimationFrame(animFrameId);
+      bloomProgress = parseFloat(e.target.value);
+      progressLabel.textContent = Math.round(bloomProgress * 100) + '%';
+      draw();
+    });
+
+    // Flower Switcher Tabs
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs.forEach(tab => {
+      if (tab.dataset.flower === currentFlower) tab.classList.add('active');
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentFlower = tab.dataset.flower;
+        const rect = container.getBoundingClientRect();
+        cachedElements = generateElements(currentFlower, rect.width, rect.height);
+        draw();
+      });
+    });
+
+    // Hover & Click interaction
+    function findElementAt(x, y) {
+      for (const el of cachedElements) {
+        if (el.order > bloomProgress) continue;
+        const halfW = el.width / 2 + 4;
+        const halfH = el.height / 2 + 2;
+        if (x >= el.x - halfW && x <= el.x + halfW && y >= el.y - halfH && y <= el.y + halfH) {
+          return el;
+        }
+      }
+      return null;
+    }
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const hit = findElementAt(x, y);
+
+      if (hit !== hoveredElement) {
+        hoveredElement = hit;
+        draw();
+        if (hit) {
+          tooltip.style.display = 'block';
+          tooltip.style.left = hit.x + 'px';
+          tooltip.style.top = (hit.y - 10) + 'px';
+          tooltipLang.textContent = (hit.phrase.flag || '💖') + ' ' + (hit.phrase.language || 'World');
+          tooltipText.textContent = '"' + hit.text + '" • ' + (hit.phrase.pronunciation || hit.phrase.phrase);
+        } else {
+          tooltip.style.display = 'none';
+        }
+      }
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      hoveredElement = null;
+      tooltip.style.display = 'none';
+      draw();
+    });
+
+    // Click to pronounce speech
+    canvas.addEventListener('click', () => {
+      if (hoveredElement && window.speechSynthesis) {
+        try {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(hoveredElement.text);
+          utterance.rate = 0.85;
+          window.speechSynthesis.speak(utterance);
+        } catch(e) {}
+      }
+    });
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+  </script>
+</body>
+</html>
