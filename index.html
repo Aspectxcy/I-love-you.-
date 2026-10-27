@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flowers In Every Language 🌸</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+    body {
+      background-color: #030305;
+      color: #fce7f3;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    /* Top Header Bar */
+    header {
+      width: 100%;
+      max-width: 900px;
+      padding: 16px 20px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 10;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      background: rgba(255, 45, 117, 0.12);
+      border: 1px solid rgba(255, 45, 117, 0.35);
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #fda4af;
+    }
+    .flower-tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+      background: rgba(18, 18, 22, 0.85);
+      padding: 4px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #a1a1aa;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .tab-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .tab-btn.active {
+      color: #ffffff;
+      background: linear-gradient(135deg, #e11d48, #ec4899);
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
+    }
+    .dict-btn {
+      background: rgba(236, 72, 153, 0.2);
+      border: 1px solid rgba(236, 72, 153, 0.4);
+      color: #fbcfe8;
+      font-weight: 700;
+    }
+    .dict-btn:hover {
+      background: rgba(236, 72, 153, 0.35);
+      color: #ffffff;
+    }
+    /* Main Canvas Stage */
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 10px 16px;
+    }
+    .canvas-card {
+      position: relative;
+      width: 100%;
+      max-width: 580px;
+      aspect-ratio: 9 / 13;
+      max-height: 70vh;
+      background: #000000;
+      border-radius: 24px;
+      box-shadow: 0 0 50px rgba(244, 63, 94, 0.15), 0 20px 40px rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1000px;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: pointer;
+      transition: transform 0.25s ease-out;
+    }
+    /* Word Hover Card */
+    #tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: rgba(15, 15, 20, 0.95);
+      border: 1px solid rgba(244, 114, 182, 0.5);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      border-radius: 12px;
+      padding: 8px 14px;
+      font-size: 12px;
+      color: #fff;
+      display: none;
+      z-index: 50;
+      transform: translate(-50%, -120%);
+      white-space: nowrap;
+    }
+    #tooltip .lang {
+      color: #f472b6;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    #tooltip .trans {
+      color: #e4e4e7;
+      font-size: 13px;
+      margin-top: 2px;
+    }
+    #tooltip .click-hint {
+      font-size: 10px;
+      color: #fda4af;
+      margin-top: 3px;
+      font-style: italic;
+    }
+    /* Bottom-Left Canvas Interactive Badge */
+    #canvasBadge {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      background: rgba(18, 18, 22, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 14px;
+      padding: 8px 14px;
+      font-size: 12px;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      z-index: 20;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+      max-width: 280px;
+    }
+    #canvasBadge:hover {
+      background: rgba(28, 20, 26, 0.98);
+      border-color: rgba(244, 63, 94, 0.5);
+      transform: translateY(-2px);
+    }
+    /* Bottom Controls Dock */
+    footer {
+      width: 100%;
+      max-width: 700px;
+      padding: 12px 16px 24px;
+      z-index: 10;
+    }
+    .dock {
+      background: rgba(18, 18, 24, 0.9);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+    }
+    .play-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #ec4899, #f43f5e);
+      border: none;
+      color: white;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.2s ease;
+      flex-shrink: 0;
+    }
+    .play-btn:active {
+      transform: scale(0.92);
+    }
+    .reset-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #d4d4d8;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      flex-shrink: 0;
+    }
+    .reset-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+    .slider-group {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .progress-txt {
+      font-size: 11px;
+      font-family: monospace;
+      color: #a1a1aa;
+      width: 38px;
+    }
+    input[type="range"] {
+      flex: 1;
+      accent-color: #ec4899;
+      height: 5px;
+      border-radius: 4px;
+      background: #27272a;
+      cursor: pointer;
+    }
+    .dedication-badge {
+      font-size: 11px;
+      padding: 3px 10px;
+      background: rgba(236, 72, 153, 0.15);
+      border: 1px solid rgba(236, 72, 153, 0.35);
+      color: #fda4af;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+
+    /* Word Definition Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal-box {
+      position: relative;
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      background: #0e090f;
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      border-radius: 24px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(244, 63, 94, 0.2);
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 12px;
+    }
+    .close-btn {
+      background: #18181f;
+      border: 1px solid #27272a;
+      color: #a1a1aa;
+      border-radius: 10px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .close-btn:hover {
+      color: white;
+      background: #27272a;
+    }
+    .def-hero {
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.15), rgba(15, 8, 14, 0.9));
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      border-radius: 18px;
+      padding: 20px;
+      text-align: center;
+    }
+    .def-hero h2 {
+      font-size: 32px;
+      color: #ffffff;
+      margin: 8px 0;
+    }
+    .def-pronounce {
+      font-family: monospace;
+      font-size: 13px;
+      color: #fda4af;
+      margin-bottom: 12px;
+    }
+    .def-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 600px) {
+      .def-grid { grid-template-columns: 1fr; }
+    }
+    .def-card {
+      background: rgba(24, 24, 27, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+    .def-card .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #f472b6;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+    .breakdown-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .breakdown-chip {
+      background: #18181f;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+    .breakdown-chip strong {
+      color: #fbcfe8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="badge">
+      <span>Multilingual Botanical Art</span>
+    </div>
+
+    <!-- Flower Chooser Tabs & Definitions Button -->
+    <div class="flower-tabs">
+      <button class="tab-btn" data-flower="pink_rose">🌸 Pink Rose</button>
+      <button class="tab-btn" data-flower="red_rose">🌹 Red Rose</button>
+      <button class="tab-btn dict-btn" id="openDictBtn">📖 Definitions</button>
+    </div>
+  </header>
+
+  <!-- Interactive Canvas Viewport -->
+  <main>
+    <div class="canvas-card" id="cardContainer">
+      <canvas id="flowerCanvas"></canvas>
+      
+      <!-- Hover Tooltip -->
+      <div id="tooltip">
+        <div class="lang" id="tooltipLang">LANGUAGE</div>
+        <div class="trans" id="tooltipText">Translation</div>
+        <div class="click-hint">Click for definition & lore</div>
+      </div>
+
+      <!-- Bottom-Left Badge -->
+      <div id="canvasBadge" title="Click to view full definition & breakdown">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span id="badgeFlag" style="font-size: 15px;">🇰🇷</span>
+          <span id="badgeLang" style="font-weight: 700; color: #f472b6; font-size: 11px; text-transform: uppercase;">Korean</span>
+          <span style="font-size: 10px; color: #a1a1aa; margin-left: auto;">Define →</span>
+        </div>
+        <div id="badgePhrase" style="font-weight: 600; margin-top: 2px; color: #fff;">"사랑해" • saranghae</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Timeline & Controls Dock -->
+  <footer>
+    <div class="dock">
+      <button class="play-btn" id="playBtn" title="Play / Pause Bloom">⏸</button>
+      <button class="reset-btn" id="resetBtn" title="Restart from Seed">↺</button>
+      
+      <div class="slider-group">
+        <span class="progress-txt" id="progressLabel">0%</span>
+        <input type="range" id="bloomRange" min="0" max="1" step="0.005" value="0.0" />
+      </div>
+
+      <div class="dedication-badge" id="recipientBadge" style="display: none;">
+        For <span id="recipientSpan"></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Definition Modal -->
+  <div class="modal-overlay" id="defModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span id="defFlag" style="font-size: 24px;"></span>
+          <div>
+            <div id="defLang" style="font-size:14px; font-weight:700; color:#fff;"></div>
+            <div id="defFamily" style="font-size:11px; color:#a1a1aa;"></div>
+          </div>
+        </div>
+        <button class="close-btn" id="closeDefModal" title="Close">✕</button>
+      </div>
+
+      <div class="def-hero">
+        <div id="defNative" style="font-size: 12px; color:#fda4af; text-transform: uppercase; letter-spacing:0.06em;"></div>
+        <h2 id="defPhrase"></h2>
+        <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-top: 10px;">
+          <button id="defCopyBtn" class="tab-btn active" style="padding: 6px 14px; cursor:pointer;">📋 Copy Definition</button>
+        </div>
+      </div>
+
+      <div class="def-grid">
+        <div class="def-card">
+          <div class="label">English Meaning / Definition</div>
+          <div id="defMeaning" style="font-size: 13px; font-weight: 600; color: #fff;"></div>
+        </div>
+        <div class="def-card">
+          <div class="label">Literal Translation</div>
+          <div id="defLiteral" style="font-size: 13px; color: #fbcfe8; font-style: italic;"></div>
+        </div>
+      </div>
+
+      <div class="def-card" id="defBreakdownContainer">
+        <div class="label">Word-by-Word Anatomical Breakdown</div>
+        <div class="breakdown-row" id="defBreakdown"></div>
+      </div>
+
+      <div class="def-card" id="defLoreContainer">
+        <div class="label">Cultural Lore & Lore</div>
+        <div id="defFunFact" style="font-size: 12px; color: #d4d4d8; line-height: 1.5;"></div>
+      </div>
+
+      <!-- Quick Prev / Next navigation -->
+      <div style="display:flex; align-items:center; justify-content:space-between; padding-top:8px; border-top:1px solid rgba(255,255,255,0.08);">
+        <button id="defPrevBtn" class="tab-btn" style="cursor:pointer;">← Prev Language</button>
+        <span id="defIndexLabel" style="font-size:11px; font-family:monospace; color:#71717a;"></span>
+        <button id="defNextBtn" class="tab-btn" style="cursor:pointer;">Next Language →</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- EXACT EMBEDDED BOTANICAL DATA ---
+    const ROSE_HEAD = [[{"text":"Nakupenda","isBright":true},{"text":"LIEBE","isBold":true},{"text":"AMOR","isBold":true},{"text":"사랑해"},{"text":"我爱你"},{"text":"AMOR","isBold":true}],[{"text":"愛してる","isBold":true},{"text":"TI AMO","isBold":true},{"text":"Ti amo"},{"text":"รักคุณ"},{"text":"Szeretlek"},{"text":"사랑해"},{"text":"أحبك"}],[{"text":"Ik hou van jou"},{"text":"Σ' αγαπώ","isBold":true},{"text":"AMOR","isBold":true},{"text":"Te amo"},{"text":"LOVE","isBright":true},{"text":"أحبك"},{"text":"사랑해"},{"text":"愛"}],[{"text":"मैं तुमसे प्यार करता हूँ"},{"text":"AMOUR","isBold":true,"isBright":true},{"text":"愛してる"},{"text":"Szeretlek"},{"text":"รักคุณ"},{"text":"我爱你"},{"text":"사랑해"}],[{"text":"Nakupenda","isBold":true},{"text":"Nakupenda"},{"text":"Kocham cię"},{"text":"TI AMO","isBold":true},{"text":"LOVE"},{"text":"AMOR","isBright":true},{"text":"TE AMO"},{"text":"أحبك"}],[{"text":"Kocham cię"},{"text":"Eu te amo","isBold":true},{"text":"אני אוהבת אותך"},{"text":"TI AMO"},{"text":"사랑해"},{"text":"사랑해"},{"text":"รักคุณ"},{"text":"사랑해"}],[{"text":"నిన్ను ప్రేమిస్తున్నాను"},{"text":"I LOVE YOU","isBold":true,"isBright":true},{"text":"AMORE"},{"text":"Te amo"},{"text":"TI AMO"},{"text":"사랑해"},{"text":"AMOR"},{"text":"AMOR","isBold":true},{"text":"愛"}],[{"text":"నిన్ను ప్రేమిస్తున్నాను"},{"text":"I LOVE YOU","isBold":true},{"text":"ANH YÊU EM"},{"text":"TE AMO","isBold":true},{"text":"사랑해"},{"text":"AMOR"},{"text":"รักคุณ"},{"text":"LOVE","isBold":true}],[{"text":"Seni seviyorum"},{"text":"Nakupenda"},{"text":"Nakupenda","isBold":true},{"text":"אני אוהבת אותך"},{"text":"TE AMO"},{"text":"我爱你"},{"text":"사랑해"},{"text":"Volim te"},{"text":"愛"}],[{"text":"Anh yêu em"},{"text":"TE QUIERO","isBold":true},{"text":"LOVE YOU"},{"text":"Szeretlek"},{"text":"我爱你"},{"text":"LOVE","isBold":true},{"text":"사랑"},{"text":"AMOR"},{"text":"รักคุณ"},{"text":"사랑해"}],[{"text":"Mahal kita","isBold":true},{"text":"Mahal kita"},{"text":"Я тебя люблю"},{"text":"I LOVE YOU","isBold":true,"isBright":true},{"text":"AMOR"},{"text":"TE AMO"},{"text":"我爱你"},{"text":"أحبك"},{"text":"사랑"},{"text":"愛"}],[{"text":"I LOVE YOU"},{"text":"TE AMO","isBold":true,"isBright":true},{"text":"Jag älskar dig"},{"text":"నిన్ను ప్రేమిస్తున్నాను"},{"text":"愛してる"},{"text":"我爱你"},{"text":"LOVE","isBold":true},{"text":"LOVE"},{"text":"รักคุณ"},{"text":"LOVE"}],[{"text":"Jeg elsker dig"},{"text":"Kocham cię","isBold":true},{"text":"AMOUR","isBold":true},{"text":"TE AMO"},{"text":"ভালোবাসি"},{"text":"我爱你"},{"text":"รักคุณ"},{"text":"LOVE"},{"text":"أحبك"},{"text":"愛"}],[{"text":"LOVE YOU"},{"text":"I LOVE YOU","isBold":true},{"text":"Jeg elsker dig"},{"text":"愛してる"},{"text":"LOVE","isBold":true,"isBright":true},{"text":"TI amo"},{"text":"사랑해"},{"text":"我爱你"},{"text":"LOVE"}],[{"text":"ANH YÊU EM"},{"text":"Anh yêu em"},{"text":"I LOVE YOU","isBold":true},{"text":"AMOUR","isBold":true},{"text":"AMOUR"},{"text":"我爱你"},{"text":"사랑"},{"text":"我爱你"},{"text":"LOVE"}],[{"text":"Rakastan sinua"},{"text":"Aku cinta kamu"},{"text":"Ljubim te","isBold":true},{"text":"Mahal kita"},{"text":"Je t'aime"},{"text":"AMOR","isBold":true},{"text":"我爱你"},{"text":"أحبك"}],[{"text":"I LOVE YOU"},{"text":"Seni seviyorum"},{"text":"Ich liebe dich"},{"text":"Mahal kita"},{"text":"我爱你","isBold":true,"isBright":true},{"text":"أحبك"},{"text":"我爱你"},{"text":"รักคุณ"},{"text":"사랑해"}],[{"text":"Ich liebe dich"},{"text":"Nakupenda"},{"text":"愛してる","isBold":true},{"text":"Ljubim te"},{"text":"AMOUR"},{"text":"사랑"},{"text":"我爱你"},{"text":"사랑해"}],[{"text":"אני אוהבת אותך"},{"text":"Rakastan sinua"},{"text":"AMOUR","isBold":true},{"text":"Szeretlek"},{"text":"사랑해"},{"text":"Te amo"},{"text":"LIEBE","isBold":true},{"text":"أحبك"}],[{"text":"Anh yêu em"},{"text":"愛してる","isBold":true},{"text":"TI AMO","isBold":true},{"text":"Σ' αγαπώ"},{"text":"사랑해"},{"text":"LIEBE"},{"text":"사랑"},{"text":"AMOR"}],[{"text":"నిన్ను ప్రేమిస్తున్నాను"},{"text":"TE AMO","isBold":true},{"text":"Nakupenda"},{"text":"รักคุณ","isBold":true},{"text":"사랑해"},{"text":"사랑해"},{"text":"LOVE"},{"text":"我爱你"}],[{"text":"Anh yêu em"},{"text":"Te iubesc"},{"text":"Ti amo","isBold":true,"isBright":true},{"text":"Ti amo"},{"text":"AMOR"},{"text":"愛してる"},{"text":"사랑해"},{"text":"أحبك"}],[{"text":"Mahal kita"},{"text":"Szeretlek"},{"text":"Szeretlek"},{"text":"我爱你"},{"text":"사랑"},{"text":"사랑해"},{"text":"我爱你"},{"text":"รักคุณ"}],[{"text":"TE QUIERO","isBold":true},{"text":"LOVE YOU"},{"text":"Ljubim te"},{"text":"我爱你"},{"text":"我爱你"},{"text":"รักคุณ"},{"text":"愛してる"}],[{"text":"Σ' αγαπώ","isBold":true},{"text":"Mahal kita"},{"text":"LOVE","isBold":true},{"text":"LOVE"},{"text":"사랑"},{"text":"أحبك"},{"text":"รักคุณ"},{"text":"أحبك"}],[{"text":"我爱你"},{"text":"LOVE"},{"text":"사랑해"},{"text":"愛"},{"text":"  "},{"text":"사랑"},{"text":"사랑"},{"text":"รักคุณ"},{"text":"LIEBE"}],[{"text":"LOVE"},{"text":"사랑"},{"text":"أحبك"},{"text":"    "},{"text":"我爱你"},{"text":"أحبك"},{"text":"LOVE"}],[{"text":"أحبك"},{"text":"사랑"},{"text":"愛"},{"text":"    "},{"text":"我爱你"},{"text":"أحبك"},{"text":"愛"}],[{"text":"أحبك"},{"text":"LOVE"},{"text":"      "},{"text":"รักคุณ"},{"text":"사랑"}],[{"text":"LOVE"},{"text":"        "},{"text":"我爱你"}],[{"text":"사랑"},{"text":"          "},{"text":"أحبك"}]];
+    const ROSE_STEM = {"calyx":[[{"text":"AMOR"}],[{"text":"사랑해"}],[{"text":"我爱你"},{"text":"我爱你"}],[{"text":"Amour"}],[{"text":"AMOR"},{"text":"我爱你"}],[{"text":"사랑해"}]],"leftLeaf":[[{"text":"Ti amo"},{"text":"사랑해"},{"text":"Ti amo"}],[{"text":"Amour"},{"text":"Ti amo"},{"text":"我爱你"},{"text":"LOVE"},{"text":"사랑해"}],[{"text":"사랑해"},{"text":"사랑해"},{"text":"LOVE"},{"text":"Te amo"},{"text":"我爱你"}],[{"text":"사랑해"},{"text":"AMOR"},{"text":"LOVE"},{"text":"LOVE"},{"text":"Amour"}],[{"text":"愛してる"},{"text":"사랑해"},{"text":"我爱你"},{"text":"AMOR"},{"text":"我爱你"}],[{"text":"Amour"},{"text":"AMOR"},{"text":"AMOR"},{"text":"LOVE"}]],"rightLeaf":[[{"text":"AMOR"},{"text":"LOVE"},{"text":"사랑해"}],[{"text":"Te amo"},{"text":"LOVE"},{"text":"Amour"},{"text":"Amour"}],[{"text":"Miluji tě"},{"text":"Amour"},{"text":"LOVE"},{"text":"我爱你"},{"text":"LOVE"}],[{"text":"Te amo"},{"text":"LOVE"},{"text":"Ti amo"},{"text":"我爱你"},{"text":"사랑해"}],[{"text":"사랑해"},{"text":"LOVE"},{"text":"LOVE"},{"text":"我爱你"},{"text":"AMOR"}]],"lowerStem":[[{"text":"사랑해"},{"text":"我爱你"}],[{"text":"LOVE"},{"text":"我爱你"},{"text":"LOVE"},{"text":"Ti amo"},{"text":"사랑해"},{"text":"我爱你"}],[{"text":"사랑해"},{"text":"我爱你"}],[{"text":"我爱你"}],[{"text":"我爱你"},{"text":"LOVE"}],[{"text":"Amour"}],[{"text":"我爱你"},{"text":"사랑해"}],[{"text":"사랑해"}],[{"text":"AMORE"}],[{"text":"LOVE"}],[{"text":"我爱你"}],[{"text":"LOVE"}],[{"text":"我爱你"}],[{"text":"我爱你"}]]};
+    const LOVE_PHRASES = [{"id":"fr","phrase":"Je t'aime","language":"French","native":"Français","pronunciation":"zhuh tem","region":"Europe","flag":"🇫🇷","meaning":"I love you","literalMeaning":"I you love","languageFamily":"Romance (Indo-European)","breakdown":[{"word":"Je","meaning":"I","partOfSpeech":"Subject Pronoun (1st person singular)"},{"word":"t'","meaning":"you","partOfSpeech":"Object Clitic Pronoun (elision of 'te')"},{"word":"aime","meaning":"love","partOfSpeech":"Verb (present tense of 'aimer')"}],"grammaticalNotes":"The weak clitic pronoun 'te' contracts to t' before the vowel of 'aimer'. The object precedes the verb.","funFact":"In French, 'Je t'aime' is deeply reserved for true, passionate love. Adding 'bien' actually waters it down to 'I like you'!","poeticQuote":"« Car, vois-tu, chaque jour je t'aime davantage, aujourd'hui plus qu'hier et bien moins que demain. » — Rosemonde Gérard"},{"id":"es","phrase":"Te amo","language":"Spanish","native":"Español","pronunciation":"teh AH-moh","region":"Americas","flag":"🇪🇸","meaning":"I love you","literalMeaning":"You [I] love","languageFamily":"Romance (Indo-European)","breakdown":[{"word":"Te","meaning":"you","partOfSpeech":"Direct Object Pronoun (2nd person singular informal)"},{"word":"amo","meaning":"[I] love","partOfSpeech":"Verb (1st person singular present of 'amar')"}],"grammaticalNotes":"Subject pronoun 'Yo' is normally omitted because the verbal suffix '-o' clearly indicates the 1st person.","funFact":"'Te amo' is the highest poetic declaration of lifelong love in Spanish, while 'Te quiero' expresses everyday affection.","poeticQuote":"« Te amo como se aman ciertas cosas oscuras, secretamente, entre la sombra y el alma. » — Pablo Neruda"},{"id":"it","phrase":"Ti amo","language":"Italian","native":"Italiano","pronunciation":"tee AH-moh","region":"Europe","flag":"🇮🇹","meaning":"I love you","literalMeaning":"You [I] love","languageFamily":"Romance (Indo-European)","breakdown":[{"word":"Ti","meaning":"you","partOfSpeech":"Direct Object Pronoun (2nd person singular)"},{"word":"amo","meaning":"[I] love","partOfSpeech":"Verb (1st person present of 'amare')"}],"grammaticalNotes":"Direct object 'ti' stands directly before the conjugated verb 'amo'. Direct and intense.","funFact":"Italian reserves 'Ti amo' strictly for romantic soulmates, while friends and family hear 'Ti voglio bene' (I want the best for you).","poeticQuote":"« L'amor che move il sole e l'altre stelle. » — Dante Alighieri (Paradiso)"},{"id":"de","phrase":"Ich liebe dich","language":"German","native":"Deutsch","pronunciation":"ikh LEE-buh dikh","region":"Europe","flag":"🇩🇪","meaning":"I love you","literalMeaning":"I love you","languageFamily":"Germanic (Indo-European)","breakdown":[{"word":"Ich","meaning":"I","partOfSpeech":"Subject Pronoun (nominative)"},{"word":"liebe","meaning":"love","partOfSpeech":"Verb (1st person present of 'lieben')"},{"word":"dich","meaning":"you","partOfSpeech":"Direct Object Pronoun (accusative singular)"}],"grammaticalNotes":"Follows standard Subject-Verb-Object (SVO) order in main clauses. 'Dich' is the accusative direct object form of 'du'.","funFact":"Germans rarely utter 'Ich liebe dich' casually; when spoken, it carries solemn honesty and profound commitment.","poeticQuote":"« Du bist mein, ich bin dein; dessen sollst du gewiss sein. » — Medieval German Minnesang"},{"id":"ja","phrase":"愛してる","language":"Japanese","native":"日本語","pronunciation":"aishiteru (ah-ee-shee-teh-roo)","region":"Asia","flag":"🇯🇵","meaning":"I love you","literalMeaning":"Doing love / In a continuous state of love","languageFamily":"Japonic","breakdown":[{"word":"愛 (ai)","meaning":"love / affection","partOfSpeech":"Noun (Kanji root)"},{"word":"し (shi)","meaning":"to do","partOfSpeech":"Stem of verb 'suru' (to do)"},{"word":"てる (teru)","meaning":"ongoing state","partOfSpeech":"Contraction of '-te iru' (continuous progressive aspect)"}],"grammaticalNotes":"Subject (watashi) and object (anata o) are traditionally omitted as contextually understood.","funFact":"In Japanese culture, 'Aishiteru' is so weighty and sacred that novelist Soseki Natsume famously translated it as 'The moon is beautiful, isn't it?' (Tsuki ga kirei desu ne).","poeticQuote":"「月が綺麗ですね」(The moon is beautiful tonight — poetic confession of love)"},{"id":"zh","phrase":"我爱你","language":"Mandarin Chinese","native":"中文 (简体)","pronunciation":"wǒ ài nǐ (woh eye nee)","region":"Asia","flag":"🇨🇳","meaning":"I love you","literalMeaning":"I love you","languageFamily":"Sino-Tibetan","breakdown":[{"word":"我 (wǒ)","meaning":"I / me","partOfSpeech":"Subject Pronoun"},{"word":"爱 (ài)","meaning":"to love","partOfSpeech":"Transitive Verb"},{"word":"你 (nǐ)","meaning":"you","partOfSpeech":"Object Pronoun"}],"grammaticalNotes":"Classical Subject-Verb-Object (SVO) isolating syntax without noun or verb inflections.","funFact":"The traditional Chinese character for love (愛) features a heart (心) nestled gently in the center between accepting arms.","poeticQuote":"« 山无陵，江水为竭，冬雷震震，夏雨雪，天地合，乃敢与君绝！ » — 《上邪》 (Until mountains flatten and rivers dry, I shall not part from you)"},{"id":"ko","phrase":"사랑해","language":"Korean","native":"한국어","pronunciation":"saranghae (sah-rahng-heh)","region":"Asia","flag":"🇰🇷","meaning":"I love you","literalMeaning":"Doing love / Keeping you fondly in my thoughts","languageFamily":"Koreanic","breakdown":[{"word":"사랑 (sarang)","meaning":"love / deep mindful contemplation","partOfSpeech":"Noun"},{"word":"해 (hae)","meaning":"do / does","partOfSpeech":"Informal intimate present conjugation of '하다' (hada, to do)"}],"grammaticalNotes":"'Saranghae' uses the intimate informal banmal ending, reserved specifically for partners and sweethearts.","funFact":"The pure Korean root 'sarang' (사랑) is etymologically connected to 'thinking deeply of someone' and keeping them in mind.","poeticQuote":"« 너를 사랑하는 것이 내 삶의 가장 아름다운 기적이다. » (Loving you is the most beautiful miracle of my life)"},{"id":"ru","phrase":"Я тебя люблю","language":"Russian","native":"Русский","pronunciation":"ya tebya lyublyu","region":"Europe","flag":"🇷🇺","meaning":"I love you","literalMeaning":"I you love","languageFamily":"Slavic (Indo-European)","breakdown":[{"word":"Я (Ya)","meaning":"I","partOfSpeech":"Subject Pronoun (nominative)"},{"word":"тебя (tebya)","meaning":"you","partOfSpeech":"Personal Pronoun (accusative singular of 'ты')"},{"word":"люблю (lyublyu)","meaning":"[I] love","partOfSpeech":"Verb (1st person singular present of 'любить')"}],"grammaticalNotes":"Russian word order is flexible; placing 'тебя' in the middle creates an intimate poetic rhythm.","funFact":"Because Russian word order is flexible, poets write 'Люблю тебя я' or 'Тебя люблю' to place lyrical emphasis on the beloved.","poeticQuote":"« Я вас любил: любовь еще, быть может, в душе моей угасла не совсем... » — Александр Пушкин"},{"id":"tr","phrase":"Seni seviyorum","language":"Turkish","native":"Türkçe","pronunciation":"seh-nee seh-vee-yor-oom","region":"Middle East","flag":"🇹🇷","meaning":"I love you","literalMeaning":"You [I am] loving","languageFamily":"Turkic","breakdown":[{"word":"Seni","meaning":"you (definite accusative)","partOfSpeech":"Pronoun 'sen' + accusative suffix '-i'"},{"word":"seviyorum","meaning":"I am loving","partOfSpeech":"Root 'sev-' (love) + present progressive '-iyor-' + 1st person '-um'"}],"grammaticalNotes":"Agglutinative structure where tense and person suffixes attach directly to the verbal root.","funFact":"Derived from 'sevgi' (pure love). Turkish literature boasts some of the most heartrending mystical love poems (Divan poetry).","poeticQuote":"« Ben sende tattım aşkı, ben sende buldum kendimi. » (In you I tasted love, in you I found myself)"},{"id":"tl","phrase":"Mahal kita","language":"Tagalog / Filipino","native":"Tagalog","pronunciation":"mah-hal kee-tah","region":"Asia","flag":"🇵🇭","meaning":"I love you","literalMeaning":"Precious [are you to me]","languageFamily":"Austronesian (Malayo-Polynesian)","breakdown":[{"word":"Mahal","meaning":"love / precious / priceless / costly","partOfSpeech":"Noun / Adjective / Stative Predicate"},{"word":"kita","meaning":"I-to-you (portmanteau pronoun)","partOfSpeech":"Dual 1st person actor + 2nd person patient pronoun"}],"grammaticalNotes":"Special fused pronoun 'kita' encodes both 'I' (actor) and 'you' (recipient/goal) in one word.","funFact":"The word 'Mahal' also means 'precious' and 'priceless'—to love someone in Tagalog means to treasure them as beyond price.","poeticQuote":"« Ikaw ang simula at wakas ng aking bawat panalangin. » (You are the beginning and end of my every prayer)"},{"id":"ar","phrase":"أحبك","language":"Arabic","native":"العربية","pronunciation":"uhibbuka (to him) / uhibbuki (to her)","region":"Middle East","flag":"🇦🇪","meaning":"I love you","literalMeaning":"I love you","languageFamily":"Afroasiatic (Semitic)","breakdown":[{"word":"أُحِبُّ (uhibbu)","meaning":"I love","partOfSpeech":"Imperfective 1st person verb from root ح-ب-ب (ḥ-b-b)"},{"word":"ـكَ / ـكِ (-ka / -ki)","meaning":"you (masculine / feminine)","partOfSpeech":"Attached Objective Pronominal Suffix"}],"grammaticalNotes":"Triliteral root ḥ-b-b with attached direct object suffix, expressing wholehearted devotion.","funFact":"The Arabic language possesses over 11 distinct ascending stages of love, from 'Hawa' (attraction) to 'Ishq' (burning passion) and 'Huyum' (insane adoration).","poeticQuote":"« وما كنت ممن يدخل العشق قلبه ولكن من يبصر جفونك يعشق. » — المتنبي"},{"id":"hi","phrase":"मैं तुमसे प्यार करता हूँ","language":"Hindi","native":"हिन्दी","pronunciation":"main tumse pyaar karta hoon","region":"Asia","flag":"🇮🇳","meaning":"I love you","literalMeaning":"I with-you love do","languageFamily":"Indo-Aryan (Indo-European)","breakdown":[{"word":"मैं (main)","meaning":"I","partOfSpeech":"Subject Pronoun"},{"word":"तुमसे (tumse)","meaning":"with/from you","partOfSpeech":"Pronoun 'tum' + instrumental postposition 'se'"},{"word":"प्यार (pyaar)","meaning":"love / affection","partOfSpeech":"Noun (from Sanskrit 'priya')"},{"word":"करता हूँ (karta hoon)","meaning":"do / am doing","partOfSpeech":"Auxiliary Verb compound"}],"grammaticalNotes":"Compound verbal predicate formed with the noun 'pyaar' and auxiliary 'karna'. (Females say 'karti hoon').","funFact":"The word 'Pyaar' traces back to Sanskrit 'Priya', symbolizing dear, cherished, and an eternal divine bond like Radha-Krishna.","poeticQuote":"« तेरे बिना ज़िंदगी से कोई शिकवा तो नहीं, तेरे बिना ज़िंदगी भी लेकिन ज़िंदगी तो नहीं। »"},{"id":"pt","phrase":"Eu te amo","language":"Portuguese","native":"Português","pronunciation":"eh-oo chee AH-moo","region":"Americas","flag":"🇧🇷","meaning":"I love you","literalMeaning":"I you love","languageFamily":"Romance (Indo-European)","breakdown":[{"word":"Eu","meaning":"I","partOfSpeech":"Subject Pronoun"},{"word":"te","meaning":"you","partOfSpeech":"Direct Object Clitic Pronoun"},{"word":"amo","meaning":"love","partOfSpeech":"Verb (1st person present of 'amar')"}],"grammaticalNotes":"In Brazilian Portuguese, proclisis (placing 'te' before the verb) is standard in speech and songwriting.","funFact":"Portuguese is famous for the untranslatable word 'Saudade'—the sweet, aching melancholy longing for the one you love.","poeticQuote":"« Amar não é olhar um para o outro, é olhar juntos na mesma direção. » — Antoine de Saint-Exupéry"},{"id":"el","phrase":"Σ' αγαπώ","language":"Greek","native":"Ελληνικά","pronunciation":"s'agapo (sah-gah-POH)","region":"Europe","flag":"🇬🇷","meaning":"I love you","literalMeaning":"You [I] love unconditionally","languageFamily":"Hellenic (Indo-European)","breakdown":[{"word":"Σ' (Se)","meaning":"you","partOfSpeech":"Clitic Accusative Pronoun (elided before vowel)"},{"word":"αγαπώ (agapo)","meaning":"[I] love","partOfSpeech":"Verb (1st person present active of 'αγαπώ')"}],"grammaticalNotes":"Directly derived from the classical Greek concept of Agape (ἀγάπη), selfless and enduring devotion.","funFact":"Rooted in 'Agape' (ἀγάπη), considered by ancient Greek philosophers the highest, most selfless form of unconditional universal devotion.","poeticQuote":"« Έρωτας είν' η ζωή, κι αν δεν αγαπάς, ποτέ δεν έζησες. »"},{"id":"nl","phrase":"Ik hou van jou","language":"Dutch","native":"Nederlands","pronunciation":"ik how fahn yow","region":"Europe","flag":"🇳🇱","meaning":"I love you","literalMeaning":"I hold of you","languageFamily":"Germanic (Indo-European)","breakdown":[{"word":"Ik","meaning":"I","partOfSpeech":"Subject Pronoun"},{"word":"hou","meaning":"hold / keep","partOfSpeech":"Verb (1st person present of 'houden')"},{"word":"van","meaning":"of / from","partOfSpeech":"Preposition"},{"word":"jou","meaning":"you","partOfSpeech":"Object Pronoun (stressed singular)"}],"grammaticalNotes":"The idiom 'houden van' historically meant 'to hold dear, preserve, and cherish'.","funFact":"Literally translates to 'I hold of you'—signifying keeping someone protected, cherished, and embraced safely in one's heart.","poeticQuote":"« Jij bent de zon die mijn ochtend kleurt en de ster die mijn nacht verlicht. »"},{"id":"pl","phrase":"Kocham Cię","language":"Polish","native":"Polski","pronunciation":"KOH-khahm chyeh","region":"Europe","flag":"🇵🇱","meaning":"I love you","literalMeaning":"[I] love you","languageFamily":"Slavic (Indo-European)","breakdown":[{"word":"Kocham","meaning":"[I] love","partOfSpeech":"Verb (1st person singular present of 'kochać')"},{"word":"Cię","meaning":"you","partOfSpeech":"Accusative Personal Pronoun (capitalized as a mark of devotion)"}],"grammaticalNotes":"The pronoun 'Cię' is capitalized in Polish letters to show deep personal reverence for the recipient.","funFact":"The word 'kochać' carries a gentle warmth reminiscent of caressing or cradling something infinitely precious.","poeticQuote":"« Dwa serca, jedno bicie, kocham Cię ponad życie. » (Two hearts, one beat, I love you above life itself)"},{"id":"sv","phrase":"Jag älskar dig","language":"Swedish","native":"Svenska","pronunciation":"yahg EL-skar dey","region":"Europe","flag":"🇸🇪","meaning":"I love you","literalMeaning":"I love you","languageFamily":"Germanic (Indo-European)","breakdown":[{"word":"Jag","meaning":"I","partOfSpeech":"Subject Pronoun"},{"word":"älskar","meaning":"love","partOfSpeech":"Verb (present of 'älska')"},{"word":"dig","meaning":"you","partOfSpeech":"Object Pronoun"}],"grammaticalNotes":"Direct descendant of Old Norse 'elska' (to nurture and warmly protect).","funFact":"Derived from Old Norse 'elska', which meant to nurture, protect, and care tenderly through cold Nordic winters.","poeticQuote":"« Det är vackrast när det skymmer. All den kärlek himlen rymmer. » — Pär Lagerkvist"},{"id":"sw","phrase":"Nakupenda","language":"Swahili","native":"Kiswahili","pronunciation":"nah-koo-PEN-dah","region":"Africa","flag":"🇰🇪","meaning":"I love you","literalMeaning":"I-present-you-love","languageFamily":"Bantu (Niger-Congo)","breakdown":[{"word":"Na-","meaning":"I (subject prefix) + present tense","partOfSpeech":"Fused Subject & Tense Marker"},{"word":"-ku-","meaning":"you","partOfSpeech":"Object Infix (2nd person singular)"},{"word":"-penda","meaning":"love / affection","partOfSpeech":"Verb Root"}],"grammaticalNotes":"A single elegant agglutinative verb containing subject, tense, object, and verb in one melodic breath.","funFact":"Formed as an elegant single verb: 'na-' (present tense), '-ku-' (you), '-penda' (to love warmly).","poeticQuote":"« Nakupenda sana, wewe ni pendo la moyo wangu. » (I love you so much, you are the love of my heart)"},{"id":"ga","phrase":"Táim i ngrá leat","language":"Irish Gaelic","native":"Gaeilge","pronunciation":"taw-im ih ngraw lyat","region":"Europe","flag":"🇮🇪","meaning":"I love you / I am in love with you","literalMeaning":"I am in love with you","languageFamily":"Celtic (Indo-European)","breakdown":[{"word":"Táim","meaning":"I am","partOfSpeech":"Synthetic Verb ('tá' + 1st person '-im')"},{"word":"i ngrá","meaning":"in love","partOfSpeech":"Preposition 'i' + eclipsed noun 'grá' (love)"},{"word":"leat","meaning":"with you","partOfSpeech":"Prepositional Pronoun ('le' + 'tú')"}],"grammaticalNotes":"Features Celtic initial consonant mutation (eclipsis: g -> ng after the preposition 'i').","funFact":"Literally means 'I am in love with you', or poetically 'Mo chuisle' (my pulse / beat of my heart).","poeticQuote":"« Is tú mo ghrá, mo chroí, is mo chuisle. » (You are my love, my heart, and my pulse)"},{"id":"haw","phrase":"Aloha au iā 'oe","language":"Hawaiian","native":"‘Ōlelo Hawai‘i","pronunciation":"ah-LOH-hah ow ee-AH oh-eh","region":"Oceania","flag":"🌺","meaning":"I love you","literalMeaning":"Love [am] I toward you","languageFamily":"Austronesian (Polynesian)","breakdown":[{"word":"Aloha","meaning":"love / affection / divine breath","partOfSpeech":"Stative Verb / Noun"},{"word":"au","meaning":"I","partOfSpeech":"Subject Pronoun"},{"word":"iā","meaning":"towards / unto","partOfSpeech":"Object Marker"},{"word":"'oe","meaning":"you","partOfSpeech":"Personal Pronoun (singular)"}],"grammaticalNotes":"Verb-Subject-Object (VSO) structure highlighting the spirit of Aloha first.","funFact":"'Aloha' conveys sharing the divine breath of life ('ha') in the presence ('alo') of sacred warmth.","poeticQuote":"« He pua nani ʻoe i kuʻu maka. » (You are a beautiful flower in my eyes)"},{"id":"bn","phrase":"আমি তোমাকে ভালোবাসি","language":"Bengali","native":"বাংলা","pronunciation":"ami tomake bhalobashi","region":"Asia","flag":"🇧🇩","meaning":"I love you","literalMeaning":"I to-you make-goodness","languageFamily":"Indo-Aryan (Indo-European)","breakdown":[{"word":"আমি (ami)","meaning":"I","partOfSpeech":"Subject Pronoun"},{"word":"তোমাকে (tomake)","meaning":"to you","partOfSpeech":"Pronoun (objective/dative of 'tumi')"},{"word":"ভালোবাসি (bhalobashi)","meaning":"love","partOfSpeech":"Verb root 'bhalo' (good) + 'basha' (dwell/make a home)"}],"grammaticalNotes":"Literally 'making a dwelling of good' for the beloved.","funFact":"The language of Nobel poet Rabindranath Tagore, where 'Bhalobasha' literally translates as 'making a home of goodness'.","poeticQuote":"« আমার এই ভালোবাসার শেষ নেই, এ ভালোবাসা অসীম। » — রবীন্দ্রনাথ ঠাকুর"},{"id":"id","phrase":"Aku cinta kamu","language":"Indonesian","native":"Bahasa Indonesia","pronunciation":"ah-koo chin-tah kah-moo","region":"Asia","flag":"🇮🇩","meaning":"I love you","literalMeaning":"I love you","languageFamily":"Austronesian (Malayo-Polynesian)","breakdown":[{"word":"Aku","meaning":"I / me","partOfSpeech":"Subject Pronoun (intimate/warm)"},{"word":"cinta","meaning":"love","partOfSpeech":"Transitive Verb / Noun (from Sanskrit 'cintā')"},{"word":"kamu","meaning":"you","partOfSpeech":"Object Pronoun"}],"grammaticalNotes":"Simple, elegant SVO structure. 'Aku' creates a close, tender bond.","funFact":"'Cinta' traces back to Sanskrit 'Cintā', signifying constant contemplation and sweet mindful wonder.","poeticQuote":"« Cinta sejati tidak pernah berakhir, ia tumbuh dan mekar selamanya. »"},{"id":"vi","phrase":"Anh yêu em","language":"Vietnamese","native":"Tiếng Việt","pronunciation":"ahn eeyew em","region":"Asia","flag":"🇻🇳","meaning":"I love you","literalMeaning":"Older-brother loves younger-sister/flower","languageFamily":"Austroasiatic","breakdown":[{"word":"Anh","meaning":"I (protective elder brother)","partOfSpeech":"Kinship Kin-Pronoun"},{"word":"yêu","meaning":"love","partOfSpeech":"Transitive Verb"},{"word":"em","meaning":"you (gentle younger sweetheart)","partOfSpeech":"Kinship Kin-Pronoun"}],"grammaticalNotes":"Vietnamese uses relational kinship terms instead of abstract pronouns, infusing every word with tender intimacy.","funFact":"Pronouns in Vietnamese express tender relation—'Anh' (older/protective brother) loving 'Em' (beloved gentle flower).","poeticQuote":"« Trăm năm bia đá thì mòn, ngàn năm bia miệng vẫn còn trơ trơ. Tình anh trao em mãi vẹn nguyên. »"},{"id":"th","phrase":"ฉันรักเธอ","language":"Thai","native":"ไทย","pronunciation":"chan rak thoe (or phom rak khun)","region":"Asia","flag":"🇹🇭","meaning":"I love you","literalMeaning":"I love you","languageFamily":"Kra-Dai","breakdown":[{"word":"ฉัน (chan)","meaning":"I / me","partOfSpeech":"Personal Pronoun"},{"word":"รัก (rak)","meaning":"love","partOfSpeech":"Verb (related to Sanskrit 'rakta' - colored by passion)"},{"word":"เธอ (thoe)","meaning":"you","partOfSpeech":"Intimate Pronoun"}],"grammaticalNotes":"Tonal language; 'rak' carries high tone expressing affection.","funFact":"The word 'Rak' (รัก) is shared across millennia of Buddhist and courtly poetry to denote devotional warmth.","poeticQuote":"« รักเธอเท่าฟ้า สัญญากับใจว่าจะรักตลอดไป » (I love you as boundless as the sky)"},{"id":"hu","phrase":"Szeretlek","language":"Hungarian","native":"Magyar","pronunciation":"SEH-ret-lek","region":"Europe","flag":"🇭🇺","meaning":"I love you","literalMeaning":"I-love-THEE","languageFamily":"Uralic (Finno-Ugric)","breakdown":[{"word":"Szeret-","meaning":"to love","partOfSpeech":"Verb Root 'szeret'"},{"word":"-lek","meaning":"I ... you","partOfSpeech":"Portmanteau Suffix (1st person subject acting upon 2nd person object)"}],"grammaticalNotes":"Uralic agglutinative mastery: the single suffix '-lek' encapsulates 'I' acting on 'YOU'.","funFact":"Hungarian grammar compresses subject and object into a single intimate verb ending: 'I love YOU'.","poeticQuote":"« Te vagy a fény a sötétségben, a szívem dobbanása. » (You are the light in the dark, the heartbeat of my soul)"},{"id":"ro","phrase":"Te iubesc","language":"Romanian","native":"Română","pronunciation":"teh yoo-BESK","region":"Europe","flag":"🇷🇴","meaning":"I love you","literalMeaning":"You [I] love","languageFamily":"Romance (Indo-European)","breakdown":[{"word":"Te","meaning":"you","partOfSpeech":"Accusative Clitic Pronoun"},{"word":"iubesc","meaning":"[I] love","partOfSpeech":"Verb (1st person present of 'iubi', from Slavic 'ljub-')"}],"grammaticalNotes":"A Romance language that adopted the tender Slavic root for love ('ljub'), creating a uniquely sweet lyrical blend.","funFact":"A Romance language that adopted the Slavic root for love ('ljub'), creating a uniquely sweet lyrical blend.","poeticQuote":"« Te iubesc nu doar pentru ceea ce ești, ci pentru ceea ce sunt eu când sunt cu tine. »"},{"id":"uk","phrase":"Я тебе кохаю","language":"Ukrainian","native":"Українська","pronunciation":"ya tebe kohayu","region":"Europe","flag":"🇺🇦","meaning":"I love you passionately","literalMeaning":"I you cherish/love","languageFamily":"Slavic (Indo-European)","breakdown":[{"word":"Я (Ya)","meaning":"I","partOfSpeech":"Subject Pronoun"},{"word":"тебе (tebe)","meaning":"you","partOfSpeech":"Accusative Pronoun"},{"word":"кохаю (kohayu)","meaning":"love passionately","partOfSpeech":"Verb (1st person present of 'кохати')"}],"grammaticalNotes":"Ukrainian distinguishes between 'любити' (liking, affection) and 'кохати' (true romantic soulmate passion).","funFact":"'Кохаю' is reserved exclusively for deep, tender romantic passion, distinct from liking things or friendships.","poeticQuote":"« Я тебе кохаю так, як небо кохає зорі. » (I love you as the heavens love the stars)"},{"id":"cs","phrase":"Miluji tě","language":"Czech","native":"Čeština","pronunciation":"MEE-loo-yee tyeh","region":"Europe","flag":"🇨🇿","meaning":"I love you","literalMeaning":"[I] love you","languageFamily":"Slavic (Indo-European)","breakdown":[{"word":"Miluji","meaning":"[I] love","partOfSpeech":"Verb (1st person present of 'milovat')"},{"word":"tě","meaning":"you","partOfSpeech":"Accusative Enclitic Pronoun of 'ty'"}],"grammaticalNotes":"Follows Wackernagel's law: the short pronoun 'tě' sits in the second position of the clause.","funFact":"Prague on May 1st (Czech Day of Love) sees thousands of couples kissing under blooming cherry blossom trees!","poeticQuote":"« Byl pozdní večer – první máj – večerní máj – byl lásky čas. » — Karel Hynek Mácha"},{"id":"fa","phrase":"دوستت دارم","language":"Persian (Farsi)","native":"فارسی","pronunciation":"doostat daram","region":"Middle East","flag":"🇮🇷","meaning":"I love you","literalMeaning":"Friend/beloved you I hold","languageFamily":"Iranian (Indo-European)","breakdown":[{"word":"دوست (doost)","meaning":"friend / beloved","partOfSpeech":"Noun"},{"word":"-at","meaning":"you","partOfSpeech":"Attached Pronominal Clitic"},{"word":"دارم (daram)","meaning":"I have / I hold","partOfSpeech":"Verb (present of 'dashtan', to hold)"}],"grammaticalNotes":"Compound light-verb construction literally meaning 'I hold you as my beloved friend of the soul'.","funFact":"Persian poetry by Rumi and Hafez is celebrated as the pinnacle of divine and romantic love literature.","poeticQuote":"« هرگز وجود حاضر غایب شنیده‌ای؟ من در میان جمع و دلم جای دیگر است. » — سعدی"},{"id":"he","phrase":"אני אוהב אותך","language":"Hebrew","native":"עברית","pronunciation":"ani ohev otach (m to f)","region":"Middle East","flag":"🇮🇱","meaning":"I love you","literalMeaning":"I [am] loving you","languageFamily":"Afroasiatic (Semitic)","breakdown":[{"word":"אני (Ani)","meaning":"I","partOfSpeech":"Subject Pronoun"},{"word":"אוהב (ohev)","meaning":"love / loving","partOfSpeech":"Present Participle / Verb (masculine singular of א-ה-ב)"},{"word":"אותך (otach)","meaning":"you (feminine)","partOfSpeech":"Definite Direct Object marker 'et' + feminine suffix"}],"grammaticalNotes":"Hebrew verbs inflect by gender: a woman declaring to a man says 'Ani ohevet otcha'.","funFact":"The root 'Ahav' appears throughout King Solomon's Song of Songs: 'I am my beloved's, and my beloved is mine'.","poeticQuote":"« אֲנִי לְדוֹדִי וְדוֹדִי לִי » (I am my beloved's, and my beloved is mine — Shir HaShirim 6:3)"},{"id":"da","phrase":"Jeg elsker dig","language":"Danish","native":"Dansk","pronunciation":"yai el-sker dai","region":"Europe","flag":"🇩🇰","meaning":"I love you","literalMeaning":"I love you","languageFamily":"Germanic (Indo-European)","breakdown":[{"word":"Jeg","meaning":"I","partOfSpeech":"Subject Pronoun"},{"word":"elsker","meaning":"love","partOfSpeech":"Present tense of 'elske'"},{"word":"dig","meaning":"you","partOfSpeech":"Object Pronoun"}],"grammaticalNotes":"Shared North Germanic root with Swedish and Norwegian.","funFact":"Deeply connected to the Danish concept of 'hygge'—warm candlelight, closeness, and feeling safe together.","poeticQuote":"« Du er min sol i mørket og mit hjerte i natten. »"},{"id":"no","phrase":"Jeg elsker deg","language":"Norwegian","native":"Norsk","pronunciation":"yai el-sker dai","region":"Europe","flag":"🇳🇴","meaning":"I love you","literalMeaning":"I love you","languageFamily":"Germanic (Indo-European)","breakdown":[{"word":"Jeg","meaning":"I","partOfSpeech":"Subject Pronoun"},{"word":"elsker","meaning":"love","partOfSpeech":"Verb (present of 'elske')"},{"word":"deg","meaning":"you","partOfSpeech":"Object Pronoun"}],"grammaticalNotes":"Clean SVO word order, reserved for heartfelt soulmate declarations.","funFact":"Shared with the majestic fjords and Northern Lights, representing enduring loyalty under Arctic skies.","poeticQuote":"« Du er den vakreste stjernen på min himmel. »"},{"id":"fi","phrase":"Minä rakastan sinua","language":"Finnish","native":"Suomi","pronunciation":"mee-na RAH-kas-tahn SEE-noo-ah","region":"Europe","flag":"🇫🇮","meaning":"I love you","literalMeaning":"I love of-you","languageFamily":"Uralic (Finno-Ugric)","breakdown":[{"word":"Minä","meaning":"I","partOfSpeech":"Subject Pronoun (nominative)"},{"word":"rakastan","meaning":"love","partOfSpeech":"Verb (1st person singular present of 'rakastaa')"},{"word":"sinua","meaning":"you","partOfSpeech":"Partitive case of 'sinä' (you)"}],"grammaticalNotes":"The verb 'rakastaa' governs the partitive case ('sinua'), indicating an unbounded, unending emotion.","funFact":"Finns are famous for quiet sincerity; to hear 'Minä rakastan sinua' is considered an unbreakable lifelong vow.","poeticQuote":"« Sinä olet minun sydämeni laulu ja elämäni valo. » (You are the song of my heart and the light of my life)"},{"id":"ur","phrase":"میں آپ سے محبت کرتا ہوں","language":"Urdu","native":"اردو","pronunciation":"main aap se mohabbat karta hoon","region":"Asia","flag":"🇵🇰","meaning":"I love you deeply","literalMeaning":"I with-you love do","languageFamily":"Indo-Aryan (Indo-European)","breakdown":[{"word":"میں (main)","meaning":"I","partOfSpeech":"Subject Pronoun"},{"word":"آپ سے (aap se)","meaning":"with you (respectful)","partOfSpeech":"Pronoun + Postposition"},{"word":"محبت (mohabbat)","meaning":"pure love","partOfSpeech":"Noun (from Arabic root ḥ-b-b)"},{"word":"کرتا ہوں (karta hoon)","meaning":"do / am doing","partOfSpeech":"Auxiliary Compound"}],"grammaticalNotes":"'Aap' adds supreme respect and courtly elegance to the romantic confession.","funFact":"'Mohabbat' and 'Ishq' in Urdu Ghazals are revered as forms of profound worship and spiritual devotion.","poeticQuote":"« تیرے عشق کی انتہا چاہتا ہوں، مری سادگی دیکھ کیا چاہتا ہوں۔ » — علامہ اقبال"},{"id":"ta","phrase":"நான் உன்னை காதலிக்கிறேன்","language":"Tamil","native":"தமிழ்","pronunciation":"Naan unnai kaadhalikkiren","region":"Asia","flag":"🇮🇳","meaning":"I love you","literalMeaning":"I you am-loving","languageFamily":"Dravidian","breakdown":[{"word":"நான் (Naan)","meaning":"I","partOfSpeech":"Subject Pronoun"},{"word":"உன்னை (unnai)","meaning":"you","partOfSpeech":"Accusative of 'nee'"},{"word":"காதலிக்கிறேன் (kaadhalikkiren)","meaning":"am loving","partOfSpeech":"Verb root 'kaadhal' (love) + present marker + 1st person suffix"}],"grammaticalNotes":"Rooted in classical Sangam literature dating back over 2,000 years.","funFact":"Tamil Sangam literature classified romantic poems into five natural landscapes (Kurinji, Mullai, Marutham, Neythal, Palai).","poeticQuote":"« செம்புலப் பெயல் நீர் போல அன்புடை நெஞ்சம் தாம் கலந்தனவே. » — குறுந்தொகை (Like red earth and pouring rain, our loving hearts mingle as one)"},{"id":"ms","phrase":"Saya sayang awak","language":"Malay","native":"Bahasa Melayu","pronunciation":"sah-yah sah-yahng ah-wahk","region":"Asia","flag":"🇲🇾","meaning":"I love you","literalMeaning":"I cherish/love you","languageFamily":"Austronesian (Malayo-Polynesian)","breakdown":[{"word":"Saya","meaning":"I","partOfSpeech":"Polite Subject Pronoun"},{"word":"sayang","meaning":"cherish / love warmly / darling","partOfSpeech":"Verb / Term of Endearment"},{"word":"awak","meaning":"you","partOfSpeech":"Familiar Object Pronoun"}],"grammaticalNotes":"'Sayang' doubles as both the verb 'to love' and the noun 'darling/sweetheart'.","funFact":"'Sayang' means both love and sweet affectionate care, used also as a tender term of endearment like 'darling'.","poeticQuote":"« Kasihmu seperti embun pagi, menyejukkan jiwa dan menenteramkan hati. »"},{"id":"la","phrase":"Te amo","language":"Latin","native":"Latina","pronunciation":"tay AH-moh","region":"Europe","flag":"🏛️","meaning":"I love you","literalMeaning":"Thee [I] love","languageFamily":"Italic (Indo-European)","breakdown":[{"word":"Te","meaning":"thee / you","partOfSpeech":"Accusative Singular Pronoun"},{"word":"amo","meaning":"[I] love","partOfSpeech":"1st person singular present active indicative of 'amāre'"}],"grammaticalNotes":"The ancestral root of all Romance love phrases across history.","funFact":"Immortalized by Catullus: 'Odi et amo' (I hate and I love) and Virgil: 'Amor vincit omnia' (Love conquers all).","poeticQuote":"« Amor vincit omnia, et nos cedamus amori. » — Vergilius (Love conquers all things; let us yield to love)"},{"id":"eo","phrase":"Mi amas vin","language":"Esperanto","native":"Esperanto","pronunciation":"mee AH-mahs veen","region":"Europe","flag":"🌐","meaning":"I love you","literalMeaning":"I love you","languageFamily":"Constructed International Auxiliary","breakdown":[{"word":"Mi","meaning":"I","partOfSpeech":"Subject Pronoun"},{"word":"amas","meaning":"love","partOfSpeech":"Verb root 'am-' + present tense suffix '-as'"},{"word":"vin","meaning":"you","partOfSpeech":"Pronoun 'vi' + accusative direct object marker '-n'"}],"grammaticalNotes":"Demonstrates regular Esperanto grammar: '-as' for present tense, '-n' for direct accusative object.","funFact":"Created as a universal bridge across all nations, 'Mi amas vin' was designed so any two humans on Earth could speak love.","poeticQuote":"« Amo kreas la mondon, kaj en via koro mi trovas la mian. » (Love creates the world, and in your heart I find mine)"},{"id":"zu","phrase":"Ngiyakuthanda","language":"Zulu","native":"isiZulu","pronunciation":"ng-ee-yah-koo-TAHN-dah","region":"Africa","flag":"🇿🇦","meaning":"I love you","literalMeaning":"I-present-you-love","languageFamily":"Bantu (Niger-Congo)","breakdown":[{"word":"Ngi-","meaning":"I","partOfSpeech":"Subject Concord (1st person)"},{"word":"-ya-","meaning":"continuous present","partOfSpeech":"Focus Aspect Marker"},{"word":"-ku-","meaning":"you","partOfSpeech":"Object Concord"},{"word":"-thanda","meaning":"love / cherish / like","partOfSpeech":"Verb Root"}],"grammaticalNotes":"Agglutinative Bantu morphology where concords merge into a single melodic word.","funFact":"Rooted in the philosophy of Ubuntu ('I am because we are')—love is viewed as an interconnected life force.","poeticQuote":"« Ngiyakuthanda ngenhliziyo yami yonke. » (I love you with all my heart)"},{"id":"am","phrase":"እወድሻለሁ","language":"Amharic","native":"አማርኛ","pronunciation":"ewedishalehu (to her)","region":"Africa","flag":"🇪🇹","meaning":"I love you","literalMeaning":"I-love-you","languageFamily":"Afroasiatic (Semitic)","breakdown":[{"word":"እወድ (ewed)","meaning":"love / affection","partOfSpeech":"Verb Stem"},{"word":"-ሻ (-sh)","meaning":"you (feminine singular)","partOfSpeech":"Suffixed Object Marker"},{"word":"-አለሁ (-alehu)","meaning":"I am / 1st person auxiliary","partOfSpeech":"Auxiliary Verb"}],"grammaticalNotes":"Semitic Ge'ez script where syllables encode consonant and vowel combinations together.","funFact":"Ancient Semitic Ge'ez script, spoken in Ethiopia, carrying melodies sung across millennium-old highland traditions.","poeticQuote":"« የልቤ ንግሥት፣ ፍቅርሽ በሕይወቴ ውስጥ እንደ ፀሐይ ያበራል። »"},{"id":"sq","phrase":"Të dua","language":"Albanian","native":"Shqip","pronunciation":"tuh DOO-ah","region":"Europe","flag":"🇦🇱","meaning":"I love you / I want you","literalMeaning":"Thee [I] love/desire","languageFamily":"Indo-European (Albanian branch)","breakdown":[{"word":"Të","meaning":"thee / you","partOfSpeech":"Accusative Clitic Pronoun"},{"word":"dua","meaning":"[I] love / want / desire","partOfSpeech":"Verb (1st person present of 'dua')"}],"grammaticalNotes":"'Dua' unites both love and wanting into an inseparable, passionate imperative.","funFact":"'Të dua' means both 'I love you' and 'I want you', expressing total desire and devotion in two pure syllables.","poeticQuote":"« Të dua si dritën e syve të mi. » (I love you like the light of my eyes)"},{"id":"hr","phrase":"Volim te","language":"Croatian / Serbian","native":"Hrvatski / Srpski","pronunciation":"VOH-leem teh","region":"Europe","flag":"🇭🇷","meaning":"I love you","literalMeaning":"[I] will/love thee","languageFamily":"Slavic (Indo-European)","breakdown":[{"word":"Volim","meaning":"[I] love","partOfSpeech":"Verb (1st person present of 'voljeti', to love)"},{"word":"te","meaning":"thee / you","partOfSpeech":"Short Form Accusative Pronoun"}],"grammaticalNotes":"Traces back to Proto-Slavic 'volja' (free will), meaning 'I choose you with all my free will'.","funFact":"Traces to Proto-Slavic root 'volja' meaning 'will', signifying 'I choose you with all my free will and desire'.","poeticQuote":"« Volim te više od svega na svijetu. » (I love you more than anything in the world)"},{"id":"ka","phrase":"მიყვარხარ","language":"Georgian","native":"ქართული","pronunciation":"miqvarkhar","region":"Europe","flag":"🇬🇪","meaning":"I love you","literalMeaning":"You are loved by me","languageFamily":"Kartvelian","breakdown":[{"word":"მ- (m-)","meaning":"to me","partOfSpeech":"Indirect Object Prefix"},{"word":"-იყვარ- (-iqvar-)","meaning":"love","partOfSpeech":"Verbal Root"},{"word":"-ხარ (-khar)","meaning":"you are","partOfSpeech":"Subject Suffix (2nd person singular)"}],"grammaticalNotes":"Inversion verb structure: grammatical subject is 'you', while the experiencer is 'me'.","funFact":"Written in the unique rounded Mkhedruli script, spoken in the ancient birthplace of wine and mountain legends.","poeticQuote":"« სიყვარული თავად არის სიცოცხლე. » (Love itself is life)"},{"id":"is","phrase":"Ég elska þig","language":"Icelandic","native":"Íslenska","pronunciation":"yehg EL-skah theeg","region":"Europe","flag":"🇮🇸","meaning":"I love you","literalMeaning":"I love thee","languageFamily":"Germanic (Indo-European)","breakdown":[{"word":"Ég","meaning":"I","partOfSpeech":"Subject Pronoun (nominative)"},{"word":"elska","meaning":"love","partOfSpeech":"Verb (present of 'elska')"},{"word":"þig","meaning":"thee","partOfSpeech":"Accusative Pronoun with thorn letter þ"}],"grammaticalNotes":"Preserves the Old Norse thorn letter 'Þ/þ' and ancient Viking grammatical cases unchanged.","funFact":"Preserves virtually unchanged Old Norse grammar from the Viking sagas of the 9th century.","poeticQuote":"« Þú ert mín eina sanna ást. » (You are my one true love)"},{"id":"sk","phrase":"Ľúbim ťa","language":"Slovak","native":"Slovenčina","pronunciation":"LYOO-beem tyah","region":"Europe","flag":"🇸🇰","meaning":"I love you sweet and tenderly","literalMeaning":"[I] love thee","languageFamily":"Slavic (Indo-European)","breakdown":[{"word":"Ľúbim","meaning":"[I] love","partOfSpeech":"Verb (from 'ľúbiť')"},{"word":"ťa","meaning":"thee","partOfSpeech":"Accusative Clitic Pronoun"}],"grammaticalNotes":"Features the soft palatal 'ľ', expressing tenderness in romance.","funFact":"Slovaks use 'Ľúbim ťa' for romantic sweetness and 'Milujem ťa' for solemn eternal devotion.","poeticQuote":"« Si moje slnko v daždivom dni. » (You are my sunshine on a rainy day)"},{"id":"cy","phrase":"Rwy’n dy garu di","language":"Welsh","native":"Cymraeg","pronunciation":"roo-in duh gah-ree dee","region":"Europe","flag":"🏴󠁧󠁢󠁷󠁬󠁳󠁿","meaning":"I love you","literalMeaning":"I-am in your loving of-thee","languageFamily":"Celtic (Brythonic)","breakdown":[{"word":"Rwy'n","meaning":"I am","partOfSpeech":"Contraction of 'Yr wyf i yn'"},{"word":"dy","meaning":"your","partOfSpeech":"Possessive Pronoun"},{"word":"garu","meaning":"loving","partOfSpeech":"Soft mutation of verbnoun 'caru' (love)"},{"word":"di","meaning":"you","partOfSpeech":"Echo Pronoun (reinforcing)"}],"grammaticalNotes":"Classic Celtic periphrastic construction using a verbal noun and soft consonant mutation (c -> g).","funFact":"Wales celebrates St. Dwynwen's Day (the Welsh patron saint of lovers) on January 25 with hand-carved lovespoons!","poeticQuote":"« Caredig a ffyddlon yw cariad gwir. » (Kind and faithful is true love)"},{"id":"eu","phrase":"Maite zaitut","language":"Basque","native":"Euskara","pronunciation":"my-teh zye-toot","region":"Europe","flag":"🇪🇸","meaning":"I love you","literalMeaning":"Beloved you-I-have","languageFamily":"Language Isolate (Pre-Indo-European)","breakdown":[{"word":"Maite","meaning":"beloved / loved","partOfSpeech":"Adjective / Noun predicate"},{"word":"zaitut","meaning":"I-have-you","partOfSpeech":"Synthetic Auxiliary Verb (you [patient] + I [agent])"}],"grammaticalNotes":"Ergative-absolutive language with polypersonal verbal agreement encoding both lovers in one auxiliary.","funFact":"Basque is a language isolate with zero known living relatives, carrying this love phrase through tens of thousands of years.","poeticQuote":"« Iluntzean izarrak bezala, nire bihotzean beti distiratzen duzu. »"},{"id":"km","phrase":"ខ្ញុំស្រលាញ់អ្នក","language":"Khmer","native":"ភាសាខ្មែរ","pronunciation":"knhom sralanh anak","region":"Asia","flag":"🇰🇭","meaning":"I love you","literalMeaning":"I love you","languageFamily":"Austroasiatic","breakdown":[{"word":"ខ្ញុំ (knhom)","meaning":"I","partOfSpeech":"Subject Pronoun (polite)"},{"word":"ស្រលាញ់ (sralanh)","meaning":"love","partOfSpeech":"Transitive Verb"},{"word":"អ្នក (anak)","meaning":"you","partOfSpeech":"Direct Object Pronoun"}],"grammaticalNotes":"Isolating syntax written in the ancient Angkor script derived from Brahmi.","funFact":"Rendered in ornate Angkor Wat-era script, embodying gentle respect and enduring heart fidelity.","poeticQuote":"« ក្តីស្រលាញ់របស់ខ្ញុំចំពោះអ្នកមិនដែលផ្លាស់ប្តូរឡើយ »"},{"id":"my","phrase":"မင်းကိုချစ်တယ်","language":"Burmese","native":"မြန်မာစာ","pronunciation":"min ko chit tal","region":"Asia","flag":"🇲🇲","meaning":"I love you","literalMeaning":"You [I] love","languageFamily":"Sino-Tibetan (Tibeto-Burman)","breakdown":[{"word":"မင်း (min)","meaning":"you","partOfSpeech":"Pronoun"},{"word":"ကို (ko)","meaning":"accusative marker","partOfSpeech":"Object Postposition"},{"word":"ချစ် (chit)","meaning":"love","partOfSpeech":"Verb Root"},{"word":"တယ် (tal)","meaning":"affirmative present marker","partOfSpeech":"Sentence-Final Particle"}],"grammaticalNotes":"SOV word order with distinct postpositional markers and sentence-final mood particles.","funFact":"Written with graceful circular letters that originated from carving inscriptions on fragile palm leaves.","poeticQuote":"« အချစ်ဆိုတာ နှလုံးသားရဲ့ အလှပဆုံး တေးသွားပါ » (Love is the most beautiful melody of the heart)"},{"id":"ne","phrase":"म तिमीलाई माया गर्छु","language":"Nepali","native":"नेपाली","pronunciation":"ma timīlāī māyā garchu","region":"Asia","flag":"🇳🇵","meaning":"I love you","literalMeaning":"I to-you love do","languageFamily":"Indo-Aryan (Indo-European)","breakdown":[{"word":"म (ma)","meaning":"I","partOfSpeech":"Subject Pronoun"},{"word":"तिमीलाई (timīlāī)","meaning":"to you","partOfSpeech":"Pronoun 'timi' + dative/accusative marker 'lai'"},{"word":"माया (māyā)","meaning":"love / sweet cosmic devotion","partOfSpeech":"Noun"},{"word":"गर्छु (garchu)","meaning":"I do","partOfSpeech":"Verb (1st person present of 'garnu')"}],"grammaticalNotes":"Compound verb with 'māyā' signifying both cosmic wonder and human devotion.","funFact":"The word 'Māyā' carries both sweet romantic love and the mystical, magical beauty of the cosmos.","poeticQuote":"« तिम्रो माया नै मेरो जीवनको सबैभन्दा ठूलो खुसी हो » (Your love is the greatest happiness of my life)"}];
+    const RECIPIENT_NAME = "";
+
+    // Color Palettes
+    const PALETTES = {
+      pink_rose: {
+        petals: ['#ff2d75', '#ff69b4', '#f43f5e', '#fda4af', '#fbcfe8', '#ff1493'],
+        highlights: ['#ffffff', '#fbcfe8'],
+        stem: ['#22c55e', '#4ade80', '#10b981', '#86efac', '#16a34a']
+      },
+      red_rose: {
+        petals: ['#ff1744', '#e11d48', '#f43f5e', '#be123c', '#fda4af'],
+        highlights: ['#ffffff', '#fda4af'],
+        stem: ['#22c55e', '#4ade80', '#10b981', '#86efac', '#16a34a']
+      }
+    };
+
+    // Global State
+    let currentFlower = "pink_rose";
+    let bloomProgress = 0.0;
+    let isPlaying = true;
+    let cachedElements = [];
+    let hoveredElement = null;
+    let currentSelectedPhrase = LOVE_PHRASES[0];
+    let particles = [];
+    let sparkleTrail = [];
+    let lastTimestamp = 0;
+    let time = 0;
+    const DURATION = 12000; // 12 seconds for luscious, hypnotic organic bloom
+
+    // DOM Elements
+    const canvas = document.getElementById('flowerCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('cardContainer');
+    const bloomRange = document.getElementById('bloomRange');
+    const progressLabel = document.getElementById('progressLabel');
+    const playBtn = document.getElementById('playBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const tooltip = document.getElementById('tooltip');
+    const tooltipLang = document.getElementById('tooltipLang');
+    const tooltipText = document.getElementById('tooltipText');
+    const recipientBadge = document.getElementById('recipientBadge');
+    const recipientSpan = document.getElementById('recipientSpan');
+    const defModal = document.getElementById('defModal');
+    const closeDefModal = document.getElementById('closeDefModal');
+    const openDictBtn = document.getElementById('openDictBtn');
+    const canvasBadge = document.getElementById('canvasBadge');
+    const badgeFlag = document.getElementById('badgeFlag');
+    const badgeLang = document.getElementById('badgeLang');
+    const badgePhrase = document.getElementById('badgePhrase');
+
+    if (RECIPIENT_NAME) {
+      recipientBadge.style.display = 'inline-block';
+      recipientSpan.textContent = RECIPIENT_NAME;
+    }
+
+    // Helper: Find phrase metadata
+    const phraseMap = new Map();
+    LOVE_PHRASES.forEach(p => {
+      phraseMap.set(p.phrase.toLowerCase(), p);
+    });
+
+    function getPhraseForWord(word) {
+      const w = word.trim().toLowerCase();
+      if (phraseMap.has(w)) return phraseMap.get(w);
+      for (const p of LOVE_PHRASES) {
+        if (w.includes(p.phrase.toLowerCase()) || p.phrase.toLowerCase().includes(w)) {
+          return p;
+        }
+      }
+      return {
+        id: 'love',
+        phrase: word,
+        language: 'World Love',
+        native: word,
+        pronunciation: word,
+        flag: '💖',
+        meaning: 'I love you',
+        literalMeaning: 'Declaration of eternal affection',
+        languageFamily: 'Universal',
+        breakdown: [{ word: word, meaning: 'Love' }],
+        funFact: 'A sacred declaration of true love spoken from the depths of the heart.'
+      };
+    }
+
+    // Generator function for Canvas Elements
+    function generateElements(flowerType, width, height) {
+      const elements = [];
+      const cx = width / 2;
+      const cy = height * 0.36;
+      const scale = Math.min(width, height) / 520;
+      const palette = PALETTES[flowerType] || PALETTES.pink_rose;
+      let idCounter = 0;
+
+      {
+        const headTotalRows = ROSE_HEAD.length;
+        const topMargin = Math.max(26, Math.round(height * 0.04));
+        const bottomMargin = Math.max(50, Math.round(height * 0.08));
+        const availableH = height - topMargin - bottomMargin;
+        const totalFlowerRows = 44;
+        const headRowHeight = Math.max(9.5, Math.min(15.2, availableH / totalFlowerRows));
+        const scale = Math.min(width / 460, headRowHeight / 13.5);
+        const headStartY = topMargin;
+
+        const stemElements = [];
+        const leafElements = [];
+        const calyxElements = [];
+        const headElements = [];
+
+        // 1. Lower Stem: Bottom to Top
+        const junctionY = Math.round(headStartY + 31 * headRowHeight);
+        const stemRowH = headRowHeight;
+        const leftLeafStartY = junctionY;
+        const rightLeafStartY = junctionY + Math.round(stemRowH * 1.5);
+        const lowerStemStartY = junctionY;
+
+        for (let rIdx = ROSE_STEM.lowerStem.length - 1; rIdx >= 0; rIdx--) {
+          const row = ROSE_STEM.lowerStem[rIdx];
+          const y = Math.round(lowerStemStartY + rIdx * stemRowH);
+          const gap = Math.max(6, Math.round(8 * scale));
+          const wordSpans = row.map(w => {
+            const fontSize = Math.max(8.5, Math.min(11, Math.round(9.5 * scale)));
+            return { ...w, fontSize, width: Math.round(w.text.length * fontSize * 0.62) };
+          });
+          const totalW = wordSpans.reduce((a, b) => a + b.width, 0) + (wordSpans.length - 1) * gap;
+          let curX = cx - totalW / 2;
+          wordSpans.forEach(w => {
+            stemElements.push({
+              id: 'lower-stem-' + (idCounter++),
+              phrase: getPhraseForWord(w.text),
+              text: w.text,
+              x: Math.round(curX + w.width / 2),
+              y: y,
+              width: w.width,
+              height: w.fontSize + 4,
+              fontSize: w.fontSize,
+              fontWeight: '700',
+              color: palette.stem[(rIdx + idCounter) % palette.stem.length],
+              part: 'stem',
+              order: 0,
+              isGreen: true
+            });
+            curX += w.width + gap;
+          });
+        }
+
+        // 2. Leaves: Left and Right
+        const maxLeafRows = Math.max(ROSE_STEM.leftLeaf.length, ROSE_STEM.rightLeaf.length);
+        for (let rIdx = maxLeafRows - 1; rIdx >= 0; rIdx--) {
+          if (rIdx < ROSE_STEM.leftLeaf.length) {
+            const row = ROSE_STEM.leftLeaf[rIdx];
+            const y = Math.round(leftLeafStartY + rIdx * stemRowH);
+            const gap = Math.max(6, Math.round(8 * scale));
+            const wordSpans = row.map(w => {
+              const fontSize = Math.max(8.5, Math.min(10.5, Math.round(9.2 * scale)));
+              return { ...w, fontSize, width: Math.round(w.text.length * fontSize * 0.62) };
+            });
+            const totalW = wordSpans.reduce((a, b) => a + b.width, 0) + (wordSpans.length - 1) * gap;
+            let curX = cx - (12 * scale) - totalW;
+            wordSpans.forEach(w => {
+              leafElements.push({
+                id: 'left-leaf-' + (idCounter++),
+                phrase: getPhraseForWord(w.text),
+                text: w.text,
+                x: Math.round(curX + w.width / 2),
+                y: y,
+                width: w.width,
+                height: w.fontSize + 4,
+                fontSize: w.fontSize,
+                fontWeight: '700',
+                color: palette.stem[(rIdx + idCounter) % palette.stem.length],
+                part: 'leaf',
+                order: 0,
+                isGreen: true
+              });
+              curX += w.width + gap;
+            });
+          }
+          if (rIdx < ROSE_STEM.rightLeaf.length) {
+            const row = ROSE_STEM.rightLeaf[rIdx];
+            const y = Math.round(rightLeafStartY + rIdx * stemRowH);
+            const gap = Math.max(6, Math.round(8 * scale));
+            const wordSpans = row.map(w => {
+              const fontSize = Math.max(8.5, Math.min(10.5, Math.round(9.2 * scale)));
+              return { ...w, fontSize, width: Math.round(w.text.length * fontSize * 0.62) };
+            });
+            let curX = cx + 14 * scale;
+            wordSpans.forEach(w => {
+              leafElements.push({
+                id: 'right-leaf-' + (idCounter++),
+                phrase: getPhraseForWord(w.text),
+                text: w.text,
+                x: Math.round(curX + w.width / 2),
+                y: y,
+                width: w.width,
+                height: w.fontSize + 4,
+                fontSize: w.fontSize,
+                fontWeight: '700',
+                color: palette.stem[(rIdx * 2 + idCounter) % palette.stem.length],
+                part: 'leaf',
+                order: 0,
+                isGreen: true
+              });
+              curX += w.width + gap;
+            });
+          }
+        }
+
+        // 3. Calyx: Receptacle nestled right inside the V-cleft of the lower petals (Rows 25-30)
+        for (let rIdx = ROSE_STEM.calyx.length - 1; rIdx >= 0; rIdx--) {
+          const row = ROSE_STEM.calyx[rIdx];
+          const y = Math.round(headStartY + (25 + rIdx) * headRowHeight);
+          const gap = Math.max(6, Math.round(8 * scale));
+          const wordSpans = row.map(w => {
+            const fontSize = Math.max(8.5, Math.min(11, Math.round(9.8 * scale)));
+            return { ...w, fontSize, width: Math.round(w.text.length * fontSize * 0.62) };
+          });
+          const totalW = wordSpans.reduce((a, b) => a + b.width, 0) + (wordSpans.length - 1) * gap;
+          let curX = cx - totalW / 2;
+          wordSpans.forEach(w => {
+            calyxElements.push({
+              id: 'calyx-' + (idCounter++),
+              phrase: getPhraseForWord(w.text),
+              text: w.text,
+              x: Math.round(curX + w.width / 2),
+              y: y,
+              width: w.width,
+              height: w.fontSize + 4,
+              fontSize: w.fontSize,
+              fontWeight: '700',
+              color: palette.stem[idCounter % palette.stem.length],
+              part: 'calyx',
+              order: 0,
+              isGreen: true
+            });
+            curX += w.width + gap;
+          });
+        }
+
+        // 4. Petals: Rows 0 to 30 (bottom-up, with V-cleft on rows 25 to 30)
+        for (let rowIndex = headTotalRows - 1; rowIndex >= 0; rowIndex--) {
+          const row = ROSE_HEAD[rowIndex];
+          const y = Math.round(headStartY + rowIndex * headRowHeight);
+
+          if (rowIndex >= 25 && rowIndex <= 30) {
+            const gapIdx = row.findIndex(w => w.text.trim().length === 0);
+            const leftWords = (gapIdx >= 0 ? row.slice(0, gapIdx) : row.slice(0, Math.ceil(row.length / 2))).filter(w => w.text.trim().length > 0);
+            const rightWords = (gapIdx >= 0 ? row.slice(gapIdx + 1) : row.slice(Math.ceil(row.length / 2))).filter(w => w.text.trim().length > 0);
+
+            const cleftGap = Math.round((55 + (rowIndex - 25) * 24) * scale);
+            const wordGap = Math.max(6, Math.round(8 * scale));
+
+            const leftSpans = leftWords.map(w => {
+              const isLarge = w.isBold || w.isBright;
+              const fontSize = Math.max(8.5, Math.min(11, Math.round((isLarge ? 10.5 : 9.0) * scale)));
+              return { ...w, fontSize, width: Math.round(w.text.length * fontSize * 0.62) };
+            });
+            const leftTotalW = leftSpans.reduce((a, b) => a + b.width, 0) + (leftSpans.length - 1) * wordGap;
+            let leftCurX = (cx - cleftGap / 2) - leftTotalW;
+            leftSpans.forEach(w => {
+              const wordCenterX = Math.round(leftCurX + w.width / 2);
+              const color = w.isBright ? '#ffffff' : (w.isBold ? palette.petals[0] : palette.petals[idCounter % palette.petals.length]);
+              headElements.push({
+                id: flowerType + '-' + (idCounter++),
+                phrase: getPhraseForWord(w.text),
+                text: w.text,
+                x: wordCenterX,
+                y: y,
+                width: w.width,
+                height: w.fontSize + 4,
+                fontSize: w.fontSize,
+                fontWeight: w.isBold || w.isBright ? '800' : '700',
+                color: color,
+                part: 'petal',
+                order: 0,
+                isGreen: false
+              });
+              leftCurX += w.width + wordGap;
+            });
+
+            const rightSpans = rightWords.map(w => {
+              const isLarge = w.isBold || w.isBright;
+              const fontSize = Math.max(8.5, Math.min(11, Math.round((isLarge ? 10.5 : 9.0) * scale)));
+              return { ...w, fontSize, width: Math.round(w.text.length * fontSize * 0.62) };
+            });
+            let rightCurX = cx + cleftGap / 2;
+            rightSpans.forEach(w => {
+              const wordCenterX = Math.round(rightCurX + w.width / 2);
+              const color = w.isBright ? '#ffffff' : (w.isBold ? palette.petals[0] : palette.petals[idCounter % palette.petals.length]);
+              headElements.push({
+                id: flowerType + '-' + (idCounter++),
+                phrase: getPhraseForWord(w.text),
+                text: w.text,
+                x: wordCenterX,
+                y: y,
+                width: w.width,
+                height: w.fontSize + 4,
+                fontSize: w.fontSize,
+                fontWeight: w.isBold || w.isBright ? '800' : '700',
+                color: color,
+                part: 'petal',
+                order: 0,
+                isGreen: false
+              });
+              rightCurX += w.width + wordGap;
+            });
+          } else {
+            const validWords = row.filter(w => w.text.trim().length > 0);
+            if (!validWords.length) continue;
+            const wordSpans = validWords.map(w => {
+              const isLarge = w.isBold || w.isBright;
+              const fontSize = Math.max(8.5, Math.min(11.5, Math.round((isLarge ? 10.8 : 9.2) * scale)));
+              return { ...w, fontSize, width: Math.round(w.text.length * fontSize * 0.62) };
+            });
+            const gap = Math.max(6, Math.round(8.5 * scale));
+            const totalRowWidth = wordSpans.reduce((a, b) => a + b.width, 0) + (wordSpans.length - 1) * gap;
+            let curX = cx - totalRowWidth / 2;
+            wordSpans.forEach(w => {
+              const wordCenterX = Math.round(curX + w.width / 2);
+              let color = w.isBright ? '#ffffff' : (w.isBold ? palette.petals[0] : palette.petals[idCounter % palette.petals.length]);
+              const isDedication = rowIndex === 11 && Math.abs(wordCenterX - cx) < 30 * scale && RECIPIENT_NAME;
+              const finalText = isDedication ? '♥ ' + RECIPIENT_NAME + ' ♥' : w.text;
+              if (isDedication) color = '#ffffff';
+              headElements.push({
+                id: flowerType + '-' + (idCounter++),
+                phrase: getPhraseForWord(w.text),
+                text: finalText,
+                x: wordCenterX,
+                y: y,
+                width: w.width,
+                height: w.fontSize + 4,
+                fontSize: w.fontSize,
+                fontWeight: w.isBold || w.isBright ? '800' : '700',
+                color: color,
+                part: 'petal',
+                order: 0,
+                isGreen: false
+              });
+              curX += w.width + gap;
+            });
+          }
+        }
+
+        const combined = [...stemElements, ...leafElements, ...calyxElements, ...headElements];
+        combined.forEach((el, index) => {
+          el.order = Number((index / combined.length).toFixed(4));
+        });
+        return combined;
+      }
+
+      // Add Recipient Inscription if present
+      if (RECIPIENT_NAME) {
+        const heartEl = elements.find(e => e.part === 'petal' && Math.abs(e.x - cx) < 60 && Math.abs(e.y - cy) < 60);
+        if (heartEl) {
+          elements.push({
+            id: 'recipient-inscription',
+            phrase: {
+              id: 'dedication',
+              phrase: 'For ' + RECIPIENT_NAME,
+              language: 'Dedication',
+              native: RECIPIENT_NAME,
+              pronunciation: RECIPIENT_NAME,
+              flag: '💖',
+              meaning: 'Forever dedicated to ' + RECIPIENT_NAME,
+              literalMeaning: 'Handmade with infinite affection',
+              languageFamily: 'Heart',
+              breakdown: [{ word: RECIPIENT_NAME, meaning: 'Beloved' }],
+              funFact: 'Dedicated with infinite affection.'
+            },
+            text: '★ ' + RECIPIENT_NAME + ' ★',
+            x: cx,
+            y: heartEl.y - 18,
+            width: Math.round(RECIPIENT_NAME.length * 14 * 0.65),
+            height: 18,
+            fontSize: Math.round(13 * scale),
+            fontWeight: '900',
+            color: '#ffffff',
+            part: 'petal',
+            order: 0.99,
+            isGreen: false
+          });
+        }
+      }
+
+      return elements;
+    }
+
+    // Floating Atmospheric Particle System (drifting petals, fairy sparkles & bokeh)
+    function createAtmosphericParticles(w, h) {
+      const parts = [];
+      const petalColors = ['#f43f5e', '#e11d48', '#fda4af', '#be123c', '#fb7185', '#f472b6'];
+      const bokehColors = ['rgba(244, 63, 94, 0.22)', 'rgba(251, 191, 36, 0.20)', 'rgba(254, 205, 211, 0.22)', 'rgba(244, 114, 182, 0.22)'];
+      for (let i = 0; i < 35; i++) {
+        const isBokeh = Math.random() < 0.25;
+        const isSparkle = Math.random() < 0.35;
+        parts.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          size: isBokeh ? 16 + Math.random() * 26 : (isSparkle ? 2 + Math.random() * 3.5 : 7 + Math.random() * 11),
+          speedX: (Math.random() - 0.45) * 0.75,
+          speedY: 0.35 + Math.random() * 1.0,
+          rotation: Math.random() * Math.PI * 2,
+          rotationSpeed: (Math.random() - 0.5) * 0.035,
+          opacity: isBokeh ? 0.15 + Math.random() * 0.25 : 0.35 + Math.random() * 0.55,
+          color: isBokeh 
+            ? bokehColors[Math.floor(Math.random() * bokehColors.length)]
+            : petalColors[Math.floor(Math.random() * petalColors.length)],
+          type: isBokeh ? 'bokeh' : (isSparkle ? 'sparkle' : 'petal')
+        });
+      }
+      return parts;
+    }
+
+    // Canvas Resize & Setup
+    function resizeCanvas() {
+      const rect = container.getBoundingClientRect();
+      const dpr = Math.max(2, window.devicePixelRatio || 1);
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      cachedElements = generateElements(currentFlower, rect.width, rect.height);
+      particles = createAtmosphericParticles(rect.width, rect.height);
+    }
+
+    // High-Performance 60/120fps Continuous Cinematic Render Loop
+    function render(timestamp) {
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const dt = Math.min(64, timestamp - lastTimestamp);
+      lastTimestamp = timestamp;
+      time += 0.02;
+
+      // Advance bloom progress smoothly if playing
+      if (isPlaying) {
+        bloomProgress = Math.min(1.0, bloomProgress + dt / DURATION);
+        bloomRange.value = bloomProgress;
+        progressLabel.textContent = Math.round(bloomProgress * 100) + '%';
+        if (bloomProgress >= 1.0) {
+          isPlaying = false;
+          playBtn.textContent = '▶';
+        }
+      }
+
+      const rect = container.getBoundingClientRect();
+      const dpr = Math.max(2, window.devicePixelRatio || 1);
+      const width = rect.width;
+      const height = rect.height;
+
+      ctx.save();
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // 1. Pitch black background (#000000 exactly matching RoseCanvas)
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, width, height);
+
+      // 2. Subtle warm ambient glow behind the flower
+      const cx = width / 2;
+      const cy = height * 0.35;
+      const radialGrad = ctx.createRadialGradient(cx, cy, 20, cx, cy, width * 0.62);
+      if (currentFlower === 'pink_rose') {
+        radialGrad.addColorStop(0, 'rgba(244, 114, 182, 0.22)');
+        radialGrad.addColorStop(0.45, 'rgba(190, 24, 93, 0.06)');
+      } else {
+        radialGrad.addColorStop(0, 'rgba(225, 29, 72, 0.22)');
+        radialGrad.addColorStop(0.45, 'rgba(159, 18, 57, 0.06)');
+      }
+      radialGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = radialGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      // 3. Render Atmospheric Floating Petals & Fairy Lights
+      particles.forEach((p) => {
+        p.y += p.speedY;
+        p.x += p.speedX + Math.sin(time + p.y * 0.01) * 0.3;
+        p.rotation += p.rotationSpeed;
+        if (p.y > height + 30) {
+          p.y = -20;
+          p.x = Math.random() * width;
+        }
+        if (p.x < -30) p.x = width + 20;
+        if (p.x > width + 30) p.x = -20;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+
+        if (p.type === 'bokeh') {
+          const bokehGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, p.size);
+          bokehGrad.addColorStop(0, currentFlower === 'pink_rose' ? 'rgba(244, 114, 182, 0.16)' : 'rgba(244, 63, 94, 0.16)');
+          bokehGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = bokehGrad;
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (p.type === 'sparkle') {
+          ctx.fillStyle = currentFlower === 'pink_rose' ? '#fbcfe8' : '#fda4af';
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size * (1 + 0.3 * Math.sin(time * 3 + p.x)), 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.globalAlpha = p.opacity * 0.7;
+          ctx.fillStyle = currentFlower === 'pink_rose' ? '#f472b6' : '#e11d48';
+          ctx.beginPath();
+          ctx.ellipse(0, 0, p.size * 0.45, p.size * 1.1, Math.PI / 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      });
+
+      // 4. Render Mouse Sparkler Trails
+      for (let i = sparkleTrail.length - 1; i >= 0; i--) {
+        const s = sparkleTrail[i];
+        s.alpha -= 0.03;
+        s.y -= 0.3;
+        if (s.alpha <= 0) {
+          sparkleTrail.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.globalAlpha = s.alpha;
+        ctx.fillStyle = currentFlower === 'pink_rose' ? '#fbcfe8' : '#fda4af';
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // 5. Render Flower Words with Smooth Alpha & Scale Pop
+      const fontFam = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+      cachedElements.forEach(el => {
+        if (el.order > bloomProgress) return;
+        const age = bloomProgress - el.order;
+        // Fast, smooth fade-in
+        const bloomFade = Math.min(1.0, age / 0.015);
+        if (bloomFade <= 0.01) return;
+
+        ctx.save();
+        ctx.translate(el.x, el.y);
+
+        // Gentle pop-in scale when word is newly bloomed
+        if (age < 0.02) {
+          const pop = 1.0 + (1 - age / 0.02) * 0.25;
+          ctx.scale(pop, pop);
+        }
+
+        // Only highlight the exact single word that the user is actively hovering over
+        const isHovered = Boolean(hoveredElement && hoveredElement.id === el.id);
+
+        if (isHovered) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.5;
+          const pw = el.width + 10;
+          const ph = el.height + 4;
+          ctx.beginPath();
+          if (ctx.roundRect) {
+            ctx.roundRect(-pw / 2, -ph / 2, pw, ph, 5);
+          } else {
+            ctx.rect(-pw / 2, -ph / 2, pw, ph);
+          }
+          ctx.fill();
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold ' + (el.fontSize + 0.5) + 'px ' + fontFam;
+        } else {
+          // Subtle glow burst on newly born words
+          if (age < 0.012) {
+            ctx.shadowColor = '#ffffff';
+            ctx.shadowBlur = 6;
+          }
+          ctx.fillStyle = el.color;
+          ctx.font = el.fontWeight + ' ' + el.fontSize + 'px ' + fontFam;
+        }
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.globalAlpha = bloomFade;
+        ctx.fillText(el.text, 0, 0);
+        ctx.restore();
+      });
+
+      ctx.restore();
+
+      requestAnimationFrame(render);
+    }
+
+    playBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      playBtn.textContent = isPlaying ? '⏸' : '▶';
+      if (isPlaying) {
+        if (bloomProgress >= 1.0) {
+          bloomProgress = 0.0;
+          bloomRange.value = 0.0;
+          progressLabel.textContent = '0%';
+        }
+        lastTimestamp = performance.now();
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      bloomProgress = 0.0;
+      bloomRange.value = 0.0;
+      progressLabel.textContent = '0%';
+      isPlaying = true;
+      playBtn.textContent = '⏸';
+      lastTimestamp = performance.now();
+    });
+
+    bloomRange.addEventListener('input', (e) => {
+      bloomProgress = parseFloat(e.target.value);
+      progressLabel.textContent = Math.round(bloomProgress * 100) + '%';
+      if (isPlaying) {
+        isPlaying = false;
+        playBtn.textContent = '▶';
+      }
+    });
+
+    // Flower Switcher Tabs
+    const tabs = document.querySelectorAll('.tab-btn[data-flower]');
+    tabs.forEach(tab => {
+      if (tab.dataset.flower === currentFlower) tab.classList.add('active');
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentFlower = tab.dataset.flower;
+        const rect = container.getBoundingClientRect();
+        cachedElements = generateElements(currentFlower, rect.width, rect.height);
+        particles = createAtmosphericParticles(rect.width, rect.height);
+        bloomProgress = 0.0;
+        bloomRange.value = 0.0;
+        progressLabel.textContent = '0%';
+        isPlaying = true;
+        playBtn.textContent = '⏸';
+        lastTimestamp = performance.now();
+      });
+    });
+
+    // Hover & Click interaction
+    function findElementAt(x, y) {
+      for (const el of cachedElements) {
+        if (el.order > bloomProgress) continue;
+        const halfW = el.width / 2 + 5;
+        const halfH = el.height / 2 + 3;
+        if (x >= el.x - halfW && x <= el.x + halfW && y >= el.y - halfH && y <= el.y + halfH) {
+          return el;
+        }
+      }
+      return null;
+    }
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Add romantic mouse sparkler dust
+      if (Math.random() < 0.4) {
+        sparkleTrail.push({
+          x: x + (Math.random() - 0.5) * 12,
+          y: y + (Math.random() - 0.5) * 12,
+          alpha: 0.9,
+          size: 2 + Math.random() * 3
+        });
+      }
+
+      // Smooth 3D perspective tilt
+      const normX = (x / rect.width - 0.5) * 2;
+      const normY = (y / rect.height - 0.5) * 2;
+      canvas.style.transform = 'rotateX(' + (normY * 2.5) + 'deg) rotateY(' + (-normX * 3) + 'deg)';
+
+      const hit = findElementAt(x, y);
+
+      if (hit !== hoveredElement) {
+        hoveredElement = hit;
+        if (hit) {
+          tooltip.style.display = 'block';
+          tooltip.style.left = hit.x + 'px';
+          tooltip.style.top = (hit.y - 10) + 'px';
+          tooltipLang.textContent = (hit.phrase.flag || '💖') + ' ' + (hit.phrase.language || 'World');
+          tooltipText.textContent = '"' + hit.text + '" • ' + (hit.phrase.meaning || 'I love you');
+
+          // Update bottom-left badge
+          updateBadge(hit.phrase, hit.text);
+        } else {
+          tooltip.style.display = 'none';
+        }
+      }
+    });
+
+    const clearHover = () => {
+      hoveredElement = null;
+      tooltip.style.display = 'none';
+      canvas.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    };
+    canvas.addEventListener('mouseleave', clearHover);
+    canvas.addEventListener('mouseout', clearHover);
+    canvas.addEventListener('pointerleave', clearHover);
+
+    function updateBadge(p, wordText) {
+      currentSelectedPhrase = p;
+      badgeFlag.textContent = p.flag || '💖';
+      badgeLang.textContent = p.language || 'Love';
+      badgePhrase.textContent = '"' + (wordText || p.phrase) + '"';
+    }
+
+    // Modal logic
+    function openDefinitionModal(phrase, clickedWord) {
+      const p = phrase || currentSelectedPhrase;
+      currentSelectedPhrase = p;
+
+      document.getElementById('defFlag').textContent = p.flag || '💖';
+      document.getElementById('defLang').textContent = p.language || 'World';
+      document.getElementById('defFamily').textContent = (p.languageFamily || 'Universal Expression') + ' · ' + (p.region || 'World');
+      document.getElementById('defNative').textContent = p.native || p.language;
+      document.getElementById('defPhrase').textContent = '"' + (clickedWord || p.phrase) + '"';
+      document.getElementById('defMeaning').textContent = p.meaning || 'I love you';
+      document.getElementById('defLiteral').textContent = '"' + (p.literalMeaning || 'I hold of you / You are beloved') + '"';
+      document.getElementById('defFunFact').textContent = p.funFact || 'A universal word of devotion spoken from the human heart.';
+
+      // Breakdown
+      const bdContainer = document.getElementById('defBreakdown');
+      bdContainer.innerHTML = '';
+      if (p.breakdown && p.breakdown.length > 0) {
+        p.breakdown.forEach(item => {
+          const chip = document.createElement('div');
+          chip.className = 'breakdown-chip';
+          chip.innerHTML = '<strong>' + item.word + '</strong> = ' + item.meaning + (item.partOfSpeech ? ' <span style="font-size:10px; color:#a1a1aa;">(' + item.partOfSpeech + ')</span>' : '');
+          bdContainer.appendChild(chip);
+        });
+        document.getElementById('defBreakdownContainer').style.display = 'block';
+      } else {
+        document.getElementById('defBreakdownContainer').style.display = 'none';
+      }
+
+      // Index label
+      const idx = LOVE_PHRASES.findIndex(item => item.id === p.id);
+      document.getElementById('defIndexLabel').textContent = (idx >= 0 ? idx + 1 : 1) + ' / ' + LOVE_PHRASES.length;
+
+      defModal.style.display = 'flex';
+    }
+
+    // Click on canvas opens modal
+    canvas.addEventListener('click', () => {
+      if (hoveredElement) {
+        openDefinitionModal(hoveredElement.phrase, hoveredElement.text);
+      }
+    });
+
+    // Badge click opens modal
+    canvasBadge.addEventListener('click', () => {
+      openDefinitionModal(currentSelectedPhrase);
+    });
+
+    // Header Dictionary button
+    openDictBtn.addEventListener('click', () => {
+      openDefinitionModal(currentSelectedPhrase);
+    });
+
+    // Modal Close
+    closeDefModal.addEventListener('click', () => {
+      defModal.style.display = 'none';
+    });
+    defModal.addEventListener('click', (e) => {
+      if (e.target === defModal) defModal.style.display = 'none';
+    });
+
+    // Modal Copy button
+    document.getElementById('defCopyBtn').addEventListener('click', () => {
+      const p = currentSelectedPhrase;
+      const text = 'Word: "' + p.phrase + '" (' + p.language + ' ' + (p.flag || '') + ')\n• Meaning: ' + (p.meaning || 'I love you') + '\n• Literal: ' + (p.literalMeaning || '') + '\n• Lore: ' + p.funFact;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('defCopyBtn');
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copied!';
+        setTimeout(() => { btn.textContent = orig; }, 2000);
+      });
+    });
+
+    // Modal Prev & Next
+    document.getElementById('defPrevBtn').addEventListener('click', () => {
+      const idx = LOVE_PHRASES.findIndex(p => p.id === currentSelectedPhrase.id);
+      const prevIdx = (idx - 1 + LOVE_PHRASES.length) % LOVE_PHRASES.length;
+      openDefinitionModal(LOVE_PHRASES[prevIdx]);
+    });
+    document.getElementById('defNextBtn').addEventListener('click', () => {
+      const idx = LOVE_PHRASES.findIndex(p => p.id === currentSelectedPhrase.id);
+      const nextIdx = (idx + 1) % LOVE_PHRASES.length;
+      openDefinitionModal(LOVE_PHRASES[nextIdx]);
+    });
+
+    // Initial badge setup
+    const initialKorean = LOVE_PHRASES.find(p => p.id === 'ko') || LOVE_PHRASES[0];
+    updateBadge(initialKorean, initialKorean.phrase);
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Start continuous 60fps render loop with automatic blooming immediately on page open
+    lastTimestamp = performance.now();
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>
